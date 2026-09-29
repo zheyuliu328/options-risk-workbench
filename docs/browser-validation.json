@@ -1,0 +1,24 @@
+{
+  "date": "2026-09-29",
+  "runtime": "Pyodide 314.0.6; self-hosted",
+  "core": "engine ZIP built from original Python source",
+  "numeric_parity": "all fields compared with native Python; 1e-8 relative tolerance",
+  "desktop": "1320px; rendered and inspected",
+  "mobile": "390px; inspected; no body overflow; tables scroll",
+  "workflow": [
+    "sample calculation",
+    "JSON result download",
+    "HTML report download",
+    "JSON result reimport",
+    "stale result invalidation",
+    "after-expiry rejection",
+    "cancel and restart"
+  ],
+  "browser_errors": [],
+  "webmcp": "feature-detected read-only summary; supported native context unavailable, not independently verified",
+  "limitations": [
+    "no external user adoption",
+    "no QQQ historical performance reproduction",
+    "hypothetical scenarios only"
+  ]
+}
