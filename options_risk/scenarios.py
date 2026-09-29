@@ -5,9 +5,37 @@ from .pricing import price, greeks
 
 
 def number(value, name):
-    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise ValueError(f"{name} must be a finite number")
-    return float(value)
+    try:
+        result = float(value)
+    except (OverflowError, ValueError) as exc:
+        raise ValueError(f"{name} exceeds numeric range") from exc
+    if not math.isfinite(result):
+        raise ValueError(f"{name} must be a finite number")
+    return result
+
+
+def iso_date(value, name):
+    if not isinstance(value, str):
+        raise ValueError(f"{name} must be an ISO date string")
+    try:
+        return date.fromisoformat(value)
+    except ValueError as exc:
+        raise ValueError(f"{name} must be a valid ISO date") from exc
+
+
+def finite_output(value):
+    """Reject overflow even when every individual input was finite."""
+    if isinstance(value, float) and not math.isfinite(value):
+        raise ValueError("portfolio calculation exceeds numeric range; reduce position or scenario magnitude")
+    if isinstance(value, dict):
+        for child in value.values():
+            finite_output(child)
+    elif isinstance(value, list):
+        for child in value:
+            finite_output(child)
+    return value
 
 
 def fields(value, allowed, required, name):
@@ -30,7 +58,7 @@ def analyse(request):
     for key in ['underlying','currency']:
         if not isinstance(request[key], str) or not request[key].strip():
             raise ValueError(f'{key} must be a nonempty string')
-    asof = date.fromisoformat(request['as_of'])
+    asof = iso_date(request['as_of'], 'as_of')
     spot = number(request['spot'], 'spot')
     rate = number(request.get('rate', 0), 'rate')
     dividend = number(request.get('dividend_yield', 0), 'dividend_yield')
@@ -52,7 +80,7 @@ def analyse(request):
         if not isinstance(identity, str) or not identity.strip() or identity in ids:
             raise ValueError('position ids must be nonempty and unique')
         ids.add(identity)
-        expiry = date.fromisoformat(position['expiry'])
+        expiry = iso_date(position['expiry'], 'expiry')
         if expiry <= asof:
             raise ValueError('positions must expire after the valuation date')
         qty = number(position['quantity'], 'quantity')
@@ -67,7 +95,7 @@ def analyse(request):
                     dividend_yield=dividend, kind=position['kind'],
                     style=position['style'], steps=300)
         value = price(**args)
-        exposure = qty * multiplier
+        exposure = number(qty * multiplier, "quantity times multiplier")
         sensitivities = {k: v*exposure for k,v in greeks(**args).items()}
         for k,v in sensitivities.items():
             total_greeks[k] = total_greeks.get(k, 0) + v
@@ -90,6 +118,8 @@ def analyse(request):
             raise ValueError('days must be a nonnegative integer')
         if move <= -1:
             raise ValueError('spot_return must be greater than -1')
+        if days > (date.max - asof).days:
+            raise ValueError("days exceeds the supported calendar range")
         scenario_date = asof + timedelta(days=days)
         changes = []
         for row in rows:
@@ -113,7 +143,7 @@ def analyse(request):
                                      pnl=sum(x['pnl'] for x in changes), positions=changes))
     for row in rows:
         del row['_args'], row['_exposure']
-    return dict(schema_version=1, underlying=request['underlying'], currency=request['currency'],
+    return finite_output(dict(schema_version=1, underlying=request['underlying'], currency=request['currency'],
                 as_of=asof.isoformat(), spot=spot, rate=rate, dividend_yield=dividend,
                 market_value=sum(x['market_value'] for x in rows), greeks=total_greeks,
                 positions=rows, scenarios=scenario_results,
@@ -122,5 +152,5 @@ def analyse(request):
                              'Flat per-position volatility; no smile recalibration or historical executable quotes.',
                              'ACT/365 calendar days; rates/dividends unchanged under shocks.',
                              'Model-value changes exclude fees, financing, realised exercise and assignment cash flows.',
-                             'Finite-difference Greeks are local approximations; tree Greeks can be unstable.',
-                             'Scenarios are hypothetical, not a backtest, prediction or trading recommendation.'])
+                             'Greeks are local sensitivities: analytic European delta/gamma at positive time/volatility; other finite differences and tree Greeks retain numerical error.',
+                             'Scenarios are hypothetical, not a backtest, prediction or trading recommendation.']))

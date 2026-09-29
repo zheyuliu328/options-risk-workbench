@@ -41,6 +41,10 @@ Documented permitted data adapters; discrete dividends and richer convergence di
 
 ## Development and validation
 
-Independent implementation with AI-assisted development and human-reviewable tests. Current checks: 23 passing tests on local Python and GitHub CI (Python 3.10/3.12), covering closed-form reference values, parity, American exercise/convergence, fixed-contract scenarios, portfolio offsets, invalid inputs, output protection and report escaping. A readable synthetic report was visually checked at desktop size and for mobile page overflow. These checks do not reproduce the historical academic research.
+Independent implementation with AI-assisted development and human-reviewable tests. Current checks: 28 tests (including overnight numerical-boundary regressions); GitHub CI checks Python 3.10/3.12, covering closed-form reference values, parity, American exercise/convergence, fixed-contract scenarios, portfolio offsets, invalid inputs, output protection and report escaping. A readable synthetic report was visually checked at desktop size and for mobile page overflow. These checks do not reproduce the historical academic research.
 
 Browser delivery (2026-09-29): editable positions/scenarios, JSON import, JSON/HTML export, stale-result invalidation and cancellation. The same Python source runs locally and in the self-hosted Pyodide worker; all output fields matched native Python within 1e-8 relative numeric tolerance. See [browser verification](docs/browser-validation.json). No input upload endpoint.
+
+### Overnight numerical corrections (2026-09-29)
+
+European delta/gamma now use analytic BSM derivatives at positive time and volatility. A one-day, 1% volatility ATM example previously understated gamma by 22.1% because the fixed spot bump exceeded the local price curvature scale. Other sensitivities retain the documented differences. Extreme positions producing non-finite portfolio values are rejected, as are invalid dates or calendar overflow. These corrections do not add historical profit or external-user evidence. Source changes reach the public browser only after a separate deployment.

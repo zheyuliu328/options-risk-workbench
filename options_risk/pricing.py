@@ -4,7 +4,8 @@ European options use Black--Scholes--Merton with continuous dividend yield.
 American options use a Cox--Ross--Rubinstein tree, not an exchange settlement
 model. Rates and volatility are decimals; time is ACT/365-style years. Prices
 are per unit of underlying, before contract multipliers or transaction costs.
-Greeks are numerical differences, not analytic Greeks. Tree Greeks can be
+European delta/gamma use analytic derivatives at positive time and volatility;
+other Greeks use numerical differences. Tree Greeks can be
 noisy, especially gamma near a strike or an exercise boundary; check convergence
 across step counts before interpreting small differences.
 """
@@ -152,7 +153,8 @@ def greeks(*, spot, strike, years, rate, volatility, dividend_yield=0.0,
            kind="call", style="european", steps=300):
     """Finite-difference sensitivities using the same model and fixed contract.
 
-    European delta/gamma: central differences, spot bump 0.1%.
+    European delta/gamma: analytic BSM derivatives at positive time/volatility.
+    At zero volatility/expiry: central payoff differences, spot bump 0.1%.
     American delta/gamma: finite differences on the first two CRR layers;
     inside the immediate-exercise region these are intrinsic delta and zero
     gamma. At zero volatility or expiry use spot differences as above. Tree
@@ -183,6 +185,18 @@ def greeks(*, spot, strike, years, rate, volatility, dividend_yield=0.0,
                                       dividend_yield, 1.0 if kind == "call" else -1.0, steps)
         except (OverflowError, ZeroDivisionError) as exc:
             raise ValueError("inputs exceed model numeric range") from exc
+    elif style == "european" and years > 0 and volatility > 0:
+        base = value()
+        try:
+            sigma_t = volatility * math.sqrt(years)
+            d1 = (math.log(spot) - math.log(strike)
+                  + (rate - dividend_yield + 0.5 * volatility ** 2) * years) / sigma_t
+            discount = math.exp(-dividend_yield * years)
+            sign = 1.0 if kind == "call" else -1.0
+            delta = sign * discount * _cdf(sign * d1)
+            gamma = discount * math.exp(-0.5 * d1 * d1) / (math.sqrt(2 * math.pi) * spot * sigma_t)
+        except (OverflowError, ZeroDivisionError) as exc:
+            raise ValueError("inputs exceed Greek numeric range") from exc
     else:
         base = value()
         ds = spot * 0.001
