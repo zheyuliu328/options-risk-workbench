@@ -4,9 +4,9 @@
   "access": "public",
   "deployment_status": "succeeded",
   "project_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8",
-  "version_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8~appgver_7328a648d9388191b2dd6b2970e07101",
-  "deployment_id": "appgdep_6abbef9171bc81919c1a7e3f64e50681",
-  "sites_source_sha": "10a4cc11a7f0f2efe9b09a53401384c4fe889c3a",
-  "github_code_sha": "3a88bc7f2fadaa2140bd181eee1b9671f9acdc02",
-  "verification": "Native deployment succeeded; 30 Python tests, JS syntax and translated-message checks passed; CI 36602230134 success. New error recovery still awaiting browser acceptance; prior v2 browser import/export checks are separately dated."
+  "version_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8~appgver_ffc0d9aa2b848191bf3a35b54aa78886",
+  "deployment_id": "appgdep_6abc0c29513c8191960f0806f7cbd2b8",
+  "sites_source_sha": "5561717254ec495fe58059b94e38f3bff355be30",
+  "github_code_sha": "f8443fc2334a66c60924c39ae42106446319ef0c",
+  "verification": "Native deployment succeeded; 31 Python tests passed; CI 36616473988 success. Independent high-precision European vega checks and 360-case grid passed within documented scope. Prior browser import/export and error/cancel recovery acceptance are separately dated; no new v4 browser parity claim."
 }
