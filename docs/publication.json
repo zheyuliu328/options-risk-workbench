@@ -4,9 +4,9 @@
   "access": "public",
   "deployment_status": "succeeded",
   "project_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8",
-  "version_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8~appgver_64550eed8ad88191b58bc7125027d395",
-  "deployment_id": "appgdep_6abbcaffd9ec81919071cc224f85bd79",
-  "sites_source_sha": "a915b2757e9f498688ec0c3787b99c600f20209b",
-  "github_code_sha": "3b165c176fab69d7b0a7b9794dcb92c8232c0f83",
-  "verification": "native Sites terminal success; local browser functional/numeric checks; no postpublish agent browser fetch"
+  "version_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8~appgver_cfc46fd6b18881919cb9ca6c68d670fb",
+  "deployment_id": "appgdep_6abbd2121ed481919f56be21a9223457",
+  "sites_source_sha": "8df7f71bcbdfb8ef24af894abaef52241045bb67",
+  "github_code_sha": "0ae25817e905722159db5ece198c548250362929",
+  "verification": "Native deployment succeeded; 28 tests and CI passed; independent numerical corrections verified. Postpublish browser calculation completed at spot 101; pointer-click issue under investigation, Enter worked."
 }
