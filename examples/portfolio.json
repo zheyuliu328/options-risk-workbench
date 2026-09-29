@@ -1,0 +1,18 @@
+{
+  "as_of": "2026-09-29",
+  "underlying": "SYNTHETIC_ETF",
+  "currency": "USD",
+  "spot": 100,
+  "rate": 0.03,
+  "dividend_yield": 0.01,
+  "positions": [
+    {"id": "long-call", "expiry": "2026-10-29", "strike": 100, "quantity": 1, "multiplier": 100, "volatility": 0.25, "kind": "call", "style": "american"},
+    {"id": "long-put", "expiry": "2026-10-29", "strike": 100, "quantity": 1, "multiplier": 100, "volatility": 0.25, "kind": "put", "style": "american"}
+  ],
+  "scenarios": [
+    {"name": "Unchanged", "spot_return": 0, "vol_change": 0, "days": 0},
+    {"name": "Down 5%, volatility +5 points", "spot_return": -0.05, "vol_change": 0.05, "days": 1},
+    {"name": "Up 5%, volatility unchanged", "spot_return": 0.05, "vol_change": 0, "days": 1},
+    {"name": "Seven calendar days pass", "spot_return": 0, "vol_change": 0, "days": 7}
+  ]
+}

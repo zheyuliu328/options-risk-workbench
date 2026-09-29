@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "options-risk-workbench"
+version = "0.1.0"
+description = "Fixed-contract option valuation and transparent portfolio scenarios"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+options-risk = "options_risk.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["options_risk*"]
