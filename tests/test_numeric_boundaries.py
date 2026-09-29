@@ -43,3 +43,15 @@ class NumericBoundaryTests(unittest.TestCase):
 
     def test_normal_report_is_strict_json(self):
         json.dumps(analyse(self.request()), allow_nan=False)
+
+    def test_model_error_identifies_position_and_stage(self):
+        request = self.request()
+        request['positions'][0]['volatility'] = 0.00001
+        with self.assertRaisesRegex(ValueError, r'Position "long-call" \(valuation\).*CRR probability'):
+            analyse(request)
+
+    def test_scenario_error_identifies_original_contract(self):
+        request = self.request()
+        request['scenarios'][0]['days'] = 366
+        with self.assertRaisesRegex(ValueError, r'Scenario .*position "long-call".*beyond expiry'):
+            analyse(request)

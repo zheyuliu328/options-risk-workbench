@@ -10,7 +10,23 @@ function addScenario(s){if($('#scenarios tbody').children.length>=10)throw Error
 function invalidate(){last=null;$('#results').hidden=true;$('#status').textContent='输入已更新，请重新计算。'}
 function load(q){['underlying','currency','as_of','spot','rate','dividend_yield'].forEach(k=>{form.elements[k].value=(k==='rate'||k==='dividend_yield')?(q[k]??0)*100:q[k]});$('#positions tbody').replaceChildren();$('#scenarios tbody').replaceChildren();q.positions.forEach(addPosition);q.scenarios.forEach(addScenario);invalidate();$('#error').hidden=true}
 function read(){const q={};['underlying','currency','as_of'].forEach(k=>q[k]=form.elements[k].value);['spot','rate','dividend_yield'].forEach(k=>q[k]=Number(form.elements[k].value)/(k==='spot'?1:100));q.positions=[...$('#positions tbody').children].map(row=>{const p={};row.querySelectorAll('[data-key]').forEach(e=>p[e.dataset.key]=e.type==='number'?Number(e.value):e.value);p.volatility/=100;return p});q.scenarios=[...$('#scenarios tbody').children].map(row=>{const s={};row.querySelectorAll('[data-key]').forEach(e=>s[e.dataset.key]=e.type==='number'?Number(e.value):e.value);s.spot_return/=100;s.vol_change/=100;return s});return q}
-function error(e){$('#error').textContent=String(e.message||e).replace(/^ValueError:\s*/,'');$('#error').hidden=false}
+function error(e){
+ let message=String(e.message||e).replace(/^ValueError:\s*/,'');
+ const messages=[
+ ['CRR probability outside [0, 1]; change inputs or increase steps','当前波动率、利率或期限组合超出 300 步美式树的适用范围。请核对输入；当前版本无法可靠计算此项，不会自动切换为欧式模型。'],
+ ['scenario beyond expiry requires an exercise/settlement ledger; not supported','情景日期超过该持仓到期日。请缩短经过天数；本工具不处理到期后的交割现金流。'],
+ ['years and volatility must be non-negative','剩余期限或情景后的波动率为负。请核对到期日与波动率变化。'],
+ ['quantity times multiplier must be a finite number','持仓数量与合约乘数的乘积超出计算范围。请核对数量和单位。'],
+ ['portfolio calculation exceeds numeric range; reduce position or scenario magnitude','持仓或情景金额超出计算范围。请核对数量、合约乘数和市场变化。'],
+ ['positions must expire after the valuation date','到期日必须晚于估值日。'],
+ ['quantity must be a nonzero signed integer','持仓数量必须是非零整数，正数为买入，负数为卖出。'],
+ ['position ids must be nonempty and unique','每笔持仓需要不同且非空的编号。'],
+ ['scenario names must be nonempty and unique','每个情景需要不同且非空的名称。'],
+ ['days must be a nonnegative integer','经过天数必须是非负整数。']];
+ for(const [source,target] of messages)message=message.replace(source,target);
+ message=message.replace(/^Position /,'持仓 ').replace(/^Scenario /,'情景 ').replace(', position ', '，持仓 ').replace('(Greeks)', '（敏感度）').replace('(valuation)', '（估值）');
+ $('#error').textContent=message;$('#error').hidden=false;
+}
 function setBusy(v){busy=v;inputset.disabled=v;$('#run').disabled=v;$('#cancel').hidden=!v}
 function stop(message){if(worker)worker.terminate();worker=null;clearTimeout(timer);setBusy(false);invalidate();$('#status').textContent=message}
 function money(x){return new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}).format(x)}

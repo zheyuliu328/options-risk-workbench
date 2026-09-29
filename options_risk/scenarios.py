@@ -1,6 +1,7 @@
 """Fixed-contract full revaluation. No trading-performance claims."""
 from datetime import date, timedelta
 import math
+import json
 from .pricing import price, greeks
 
 
@@ -45,6 +46,14 @@ def fields(value, allowed, required, name):
         raise ValueError(f'{name}: unsupported fields {sorted(set(value)-set(allowed))}')
     if set(required) - set(value):
         raise ValueError(f'{name}: missing fields {sorted(set(required)-set(value))}')
+
+
+def model_call(function, args, identity, phase):
+    try:
+        return function(**args)
+    except ValueError as exc:
+        # JSON escaping keeps user identifiers on one line for CLI/worker errors.
+        raise ValueError(f"Position {json.dumps(identity, ensure_ascii=False)} ({phase}): {exc}") from exc
 
 
 def analyse(request):
@@ -94,9 +103,9 @@ def analyse(request):
                     volatility=number(position['volatility'], 'volatility'),
                     dividend_yield=dividend, kind=position['kind'],
                     style=position['style'], steps=300)
-        value = price(**args)
+        value = model_call(price, args, identity, "valuation")
         exposure = number(qty * multiplier, "quantity times multiplier")
-        sensitivities = {k: v*exposure for k,v in greeks(**args).items()}
+        sensitivities = {k: v*exposure for k,v in model_call(greeks, args, identity, "Greeks").items()}
         for k,v in sensitivities.items():
             total_greeks[k] = total_greeks.get(k, 0) + v
         rows.append(dict(id=identity, expiry=expiry.isoformat(), strike=args['strike'],
@@ -124,11 +133,11 @@ def analyse(request):
         changes = []
         for row in rows:
             if scenario_date > date.fromisoformat(row['expiry']):
-                raise ValueError('scenario beyond expiry requires an exercise/settlement ledger; not supported')
+                raise ValueError(f'Scenario {json.dumps(name, ensure_ascii=False)}, position {json.dumps(row["id"], ensure_ascii=False)}: scenario beyond expiry requires an exercise/settlement ledger; not supported')
             args = dict(row['_args'])
             args.update(spot=spot*(1+move), volatility=args['volatility']+vol_move,
                         years=(date.fromisoformat(row['expiry'])-scenario_date).days/365)
-            shocked = price(**args)*row['_exposure']
+            shocked = model_call(price, args, row['id'], 'scenario ' + json.dumps(name, ensure_ascii=False))*row['_exposure']
             pnl = shocked-row['market_value']
             g = row['greeks']
             ds = spot*move
