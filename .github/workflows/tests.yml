@@ -17,3 +17,18 @@ jobs:
         run: |
           cd /tmp
           options-risk "$GITHUB_WORKSPACE/examples/portfolio.json" --output installed-check.json
+
+  browser-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: node --check web/app.js && node --check web/worker.mjs
+      - run: python scripts/build_web.py

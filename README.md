@@ -2,7 +2,7 @@
 
 Revalue a fixed option portfolio under spot, volatility and time shocks. Inspect signed exposures, full-revaluation P&L and the difference from a local Greek approximation.
 
-**Current delivery: local Python tool, not yet a deployed website.** No external data, credentials or dependencies are required for the numerical calculation. The included ETF example is entirely invented.
+**Current delivery: [public browser tool](https://options-risk-zheyuliu.mystic-pear-2111.chatgpt.site) and local Python tool.** No external data, credentials or dependencies are required for the numerical calculation. The included ETF example is entirely invented.
 
 ## Run
 
@@ -37,8 +37,10 @@ Forecast Review remains a separate model-review application. Its common-sample a
 
 ## Remaining work
 
-Browser input/result/export workflow; academic evaluation version and leakage repair; documented permitted data adapters; discrete dividends and convergence diagnostics; independently checked portfolio VaR/ES if added. These are not completed capabilities. No investment recommendation, production-readiness, external adoption or regulatory-compliance claim is made.
+Academic evaluation version and leakage repair; documented permitted data adapters; discrete dividends and convergence diagnostics; independently checked portfolio VaR/ES if added. These are not completed capabilities. No investment recommendation, production-readiness, external adoption or regulatory-compliance claim is made.
 
 ## Development and validation
 
-Independent implementation with AI-assisted development and human-reviewable tests. Current local checks: 23 passing tests, covering closed-form reference values, parity, American exercise/convergence, fixed-contract scenarios, portfolio offsets, invalid inputs, output protection and report escaping. A readable synthetic report was visually checked at desktop size and for mobile page overflow. These checks do not reproduce the historical academic research.
+Independent implementation with AI-assisted development and human-reviewable tests. Current checks: 23 passing tests on local Python and GitHub CI (Python 3.10/3.12), covering closed-form reference values, parity, American exercise/convergence, fixed-contract scenarios, portfolio offsets, invalid inputs, output protection and report escaping. A readable synthetic report was visually checked at desktop size and for mobile page overflow. These checks do not reproduce the historical academic research.
+
+Browser delivery (2026-09-29): editable positions/scenarios, JSON import, JSON/HTML export, stale-result invalidation and cancellation. The same Python source runs locally and in the self-hosted Pyodide worker; all output fields matched native Python within 1e-8 relative numeric tolerance. See [browser verification](docs/browser-validation.json). No input upload endpoint.
