@@ -161,5 +161,5 @@ def analyse(request):
                              'Flat per-position volatility; no smile recalibration or historical executable quotes.',
                              'ACT/365 calendar days; rates/dividends unchanged under shocks.',
                              'Model-value changes exclude fees, financing, realised exercise and assignment cash flows.',
-                             'Greeks are local sensitivities: analytic European delta/gamma at positive time/volatility; other finite differences and tree Greeks retain numerical error.',
+                             'Greeks are local sensitivities: analytic European delta/gamma/vega at positive time/volatility; other finite differences and tree Greeks retain numerical error.',
                              'Scenarios are hypothetical, not a backtest, prediction or trading recommendation.']))

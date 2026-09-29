@@ -4,7 +4,7 @@ European options use Black--Scholes--Merton with continuous dividend yield.
 American options use a Cox--Ross--Rubinstein tree, not an exchange settlement
 model. Rates and volatility are decimals; time is ACT/365-style years. Prices
 are per unit of underlying, before contract multipliers or transaction costs.
-European delta/gamma use analytic derivatives at positive time and volatility;
+European delta/gamma/vega use analytic derivatives at positive time and volatility;
 other Greeks use numerical differences. Tree Greeks can be
 noisy, especially gamma near a strike or an exercise boundary; check convergence
 across step counts before interpreting small differences.
@@ -160,7 +160,8 @@ def greeks(*, spot, strike, years, rate, volatility, dividend_yield=0.0,
     gamma. At zero volatility or expiry use spot differences as above. Tree
     layer estimates retain time/space discretisation error, but avoid the
     strike-alignment spike from tiny external spot bumps.
-    Vega: central differences with a 0.001 absolute-volatility bump (or 0.1%
+    Vega: analytic BSM for European positive time/volatility; otherwise
+    central differences with a 0.001 absolute-volatility bump (or 0.1%
     of volatility, whichever is larger); second-order forward differences near
     zero volatility. Output is per +0.01 absolute volatility, i.e. one point.
     Rho: central differences, 0.0001 rate bump, output per +0.01 rate.
@@ -206,7 +207,9 @@ def greeks(*, spot, strike, years, rate, volatility, dividend_yield=0.0,
         delta = (up - down) / (2 * ds)
         gamma = (up - 2 * base + down) / (ds * ds)
     dv = max(0.001, volatility * 0.001)
-    if volatility >= dv:
+    if style == "european" and years > 0 and volatility > 0:
+        vega = spot * discount * math.exp(-0.5 * d1 * d1) * math.sqrt(years) / math.sqrt(2 * math.pi)
+    elif volatility >= dv:
         vega = (value(volatility=volatility + dv) - value(volatility=volatility - dv)) / (2 * dv)
     else:
         vega = (-3 * base + 4 * value(volatility=volatility + dv)

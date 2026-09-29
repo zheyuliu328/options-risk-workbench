@@ -55,3 +55,11 @@ class NumericBoundaryTests(unittest.TestCase):
         request['scenarios'][0]['days'] = 366
         with self.assertRaisesRegex(ValueError, r'Scenario .*position "long-call".*beyond expiry'):
             analyse(request)
+
+    def test_low_vol_vega_independent_decimal_references(self):
+        # 70-digit Decimal evaluation of the normal density and BSM derivative.
+        for spot, expected in ((99, 0.0002440727707836168), (101, 0.0002784235628368248)):
+            for kind in ('call', 'put'):
+                g=greeks(spot=spot,strike=100,years=30/365,rate=0,
+                         dividend_yield=0,volatility=.01,kind=kind)
+                self.assertAlmostEqual(g['vega_per_vol_point'], expected, delta=1e-14)
