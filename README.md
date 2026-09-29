@@ -37,7 +37,7 @@ Forecast Review remains a separate model-review application. Its common-sample a
 
 ## Remaining work
 
-Academic evaluation version and leakage repair; documented permitted data adapters; discrete dividends and convergence diagnostics; independently checked portfolio VaR/ES if added. These are not completed capabilities. No investment recommendation, production-readiness, external adoption or regulatory-compliance claim is made.
+Documented permitted data adapters; discrete dividends and richer convergence diagnostics; independently checked portfolio VaR/ES if added. A separate local corrected retrospective academic evaluation is complete; it is not an unseen blind test, exact old-result reproduction or part of this public runtime. These are not completed capabilities. No investment recommendation, production-readiness, external adoption or regulatory-compliance claim is made.
 
 ## Development and validation
 
