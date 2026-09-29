@@ -67,6 +67,50 @@ def _deterministic(spot, strike, years, rate, dividend_yield, sign, american):
                for t in candidates)
 
 
+def _crr(spot, strike, years, rate, volatility, dividend_yield, sign, steps):
+    """Price plus delta/gamma from the first two exercise-aware tree layers.
+
+    Taking tiny external spot bumps differentiates the piecewise-linear tree
+    interpolation and produces a spurious gamma spike at aligned strikes.
+    Layer differences instead use the natural lattice spacing and converge to
+    continuous-model Greeks as the time/space mesh is refined.
+    """
+    dt = years / steps
+    dx = volatility * math.sqrt(dt)
+    denominator = math.expm1(2.0 * dx)
+    if denominator == 0:
+        raise ValueError("CRR increment is below numeric resolution")
+    probability = math.expm1((rate - dividend_yield) * dt + dx) / denominator
+    if not math.isfinite(probability) or not 0 <= probability <= 1:
+        raise ValueError("CRR probability outside [0, 1]; change inputs or increase steps")
+    discount = math.exp(-rate * dt)
+    values = [max(sign * (spot * math.exp((2 * j - steps) * dx) - strike), 0.0)
+              for j in range(steps + 1)]
+    layers = {}
+    for level in range(steps - 1, -1, -1):
+        for j in range(level + 1):
+            continuation = discount * ((1 - probability) * values[j]
+                                       + probability * values[j + 1])
+            exercise = max(sign * (spot * math.exp((2 * j - level) * dx) - strike), 0.0)
+            values[j] = max(continuation, exercise)
+        if level in (1, 2):
+            layers[level] = values[:level + 1]
+    if exercise > continuation:
+        # Inside the immediate-exercise region, local value is intrinsic.
+        return values[0], sign, 0.0
+    one, two = layers[1], layers[2]
+    first_width = spot * (math.expm1(dx) - math.expm1(-dx))
+    upper_width = spot * math.expm1(2 * dx)
+    lower_width = -spot * math.expm1(-2 * dx)
+    if min(first_width, upper_width, lower_width) <= 0:
+        raise ValueError("CRR mesh is below numeric resolution for Greeks")
+    delta = (one[1] - one[0]) / first_width
+    delta_up = (two[2] - two[1]) / upper_width
+    delta_down = (two[1] - two[0]) / lower_width
+    gamma = (delta_up - delta_down) / (0.5 * (upper_width + lower_width))
+    return values[0], delta, gamma
+
+
 def price(*, spot, strike, years, rate, volatility, dividend_yield=0.0,
           kind="call", style="european", steps=300):
     """Return a per-unit model price, rejecting unsupported/unstable inputs.
@@ -96,24 +140,7 @@ def price(*, spot, strike, years, rate, volatility, dividend_yield=0.0,
             result = sign * (spot * math.exp(-dividend_yield * years) * _cdf(sign * d1)
                              - strike * math.exp(-rate * years) * _cdf(sign * d2))
         else:
-            dt = years / steps
-            dx = volatility * math.sqrt(dt)
-            denominator = math.expm1(2.0 * dx)
-            if denominator == 0:
-                raise ValueError("CRR increment is below numeric resolution")
-            probability = math.expm1((rate - dividend_yield) * dt + dx) / denominator
-            if not math.isfinite(probability) or not 0 <= probability <= 1:
-                raise ValueError("CRR probability outside [0, 1]; change inputs or increase steps")
-            discount = math.exp(-rate * dt)
-            values = [max(sign * (spot * math.exp((2 * j - steps) * dx) - strike), 0.0)
-                      for j in range(steps + 1)]
-            for level in range(steps - 1, -1, -1):
-                for j in range(level + 1):
-                    continuation = discount * ((1 - probability) * values[j]
-                                               + probability * values[j + 1])
-                    exercise = max(sign * (spot * math.exp((2 * j - level) * dx) - strike), 0.0)
-                    values[j] = max(continuation, exercise)
-            result = values[0]
+            result = _crr(spot, strike, years, rate, volatility, dividend_yield, sign, steps)[0]
         if not math.isfinite(result):
             raise ValueError("model result is not finite; inputs exceed numeric range")
         return max(result, 0.0)
@@ -125,7 +152,12 @@ def greeks(*, spot, strike, years, rate, volatility, dividend_yield=0.0,
            kind="call", style="european", steps=300):
     """Finite-difference sensitivities using the same model and fixed contract.
 
-    Delta/gamma: central differences, spot bump 0.1%.
+    European delta/gamma: central differences, spot bump 0.1%.
+    American delta/gamma: finite differences on the first two CRR layers;
+    inside the immediate-exercise region these are intrinsic delta and zero
+    gamma. At zero volatility or expiry use spot differences as above. Tree
+    layer estimates retain time/space discretisation error, but avoid the
+    strike-alignment spike from tiny external spot bumps.
     Vega: central differences with a 0.001 absolute-volatility bump (or 0.1%
     of volatility, whichever is larger); second-order forward differences near
     zero volatility. Output is per +0.01 absolute volatility, i.e. one point.
@@ -145,13 +177,20 @@ def greeks(*, spot, strike, years, rate, volatility, dividend_yield=0.0,
     def value(**changes):
         return price(**(inputs | changes))
 
-    base = value()
-    ds = spot * 0.001
-    if ds == 0 or ds * ds == 0:
-        raise ValueError("spot is too small for finite-difference Greeks")
-    up, down = value(spot=spot + ds), value(spot=spot - ds)
-    delta = (up - down) / (2 * ds)
-    gamma = (up - 2 * base + down) / (ds * ds)
+    if style == "american" and years > 0 and volatility > 0:
+        try:
+            base, delta, gamma = _crr(spot, strike, years, rate, volatility,
+                                      dividend_yield, 1.0 if kind == "call" else -1.0, steps)
+        except (OverflowError, ZeroDivisionError) as exc:
+            raise ValueError("inputs exceed model numeric range") from exc
+    else:
+        base = value()
+        ds = spot * 0.001
+        if ds == 0 or ds * ds == 0:
+            raise ValueError("spot is too small for finite-difference Greeks")
+        up, down = value(spot=spot + ds), value(spot=spot - ds)
+        delta = (up - down) / (2 * ds)
+        gamma = (up - 2 * base + down) / (ds * ds)
     dv = max(0.001, volatility * 0.001)
     if volatility >= dv:
         vega = (value(volatility=volatility + dv) - value(volatility=volatility - dv)) / (2 * dv)

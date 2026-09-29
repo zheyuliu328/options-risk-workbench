@@ -9,13 +9,15 @@ Revalue a fixed option portfolio under spot, volatility and time shocks. Inspect
 From this checkout, using Python 3.10 or newer:
 
 ```sh
-python3 -m options_risk examples/portfolio.json --output /tmp/options-risk-result.json
+python3 -m options_risk examples/portfolio.json --output /tmp/options-risk-result.json --html /tmp/options-risk-report.html
 python3 -m unittest discover -s tests -v
 ```
 
 Choose a new output path for each report; existing output files are protected. Optional installation: `python3 -m pip install .`, followed by `options-risk INPUT.json --output OUTPUT.json`.
 
 The JSON input declares one underlying/currency, valuation date, spot, continuous rate/dividend yield, fixed contracts and shocks. Positive quantity is long, negative is short. Strike, expiry and multiplier remain unchanged under every scenario. `vol_change: 0.05` means five absolute volatility points; `spot_return: -0.05` means a 5% price fall. Time is calendar days on ACT/365.
+
+[Read the invented sample report](docs/sample-report.html) · [Machine-readable result](docs/sample-result.json)
 
 ## What the result means
 
@@ -36,3 +38,7 @@ Forecast Review remains a separate model-review application. Its common-sample a
 ## Remaining work
 
 Browser input/result/export workflow; academic evaluation version and leakage repair; documented permitted data adapters; discrete dividends and convergence diagnostics; independently checked portfolio VaR/ES if added. These are not completed capabilities. No investment recommendation, production-readiness, external adoption or regulatory-compliance claim is made.
+
+## Development and validation
+
+Independent implementation with AI-assisted development and human-reviewable tests. Current local checks: 23 passing tests, covering closed-form reference values, parity, American exercise/convergence, fixed-contract scenarios, portfolio offsets, invalid inputs, output protection and report escaping. A readable synthetic report was visually checked at desktop size and for mobile page overflow. These checks do not reproduce the historical academic research.

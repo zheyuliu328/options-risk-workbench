@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "underlying": "SYNTHETIC_ETF",
+  "currency": "USD",
+  "as_of": "2026-09-29",
+  "spot": 100.0,
+  "rate": 0.03,
+  "dividend_yield": 0.01,
+  "market_value": 571.5183358307197,
+  "greeks": {
+    "delta": 4.442000887076212,
+    "gamma": 11.178227776745723,
+    "vega_per_vol_point": 22.793719110368205,
+    "rho_per_rate_point": 0.5079416645270562,
+    "theta_per_day": -9.598305972225416
+  },
+  "positions": [
+    {
+      "id": "long-call",
+      "expiry": "2026-10-29",
+      "strike": 100.0,
+      "quantity": 1.0,
+      "multiplier": 100.0,
+      "unit_value": 2.9344526942326983,
+      "market_value": 293.44526942326985,
+      "greeks": {
+        "delta": 52.29849203058908,
+        "gamma": 5.5659517201398225,
+        "vega_per_vol_point": 11.39870047411562,
+        "rho_per_rate_point": 4.0573065242544,
+        "theta_per_day": -5.052466369698471
+      }
+    },
+    {
+      "id": "long-put",
+      "expiry": "2026-10-29",
+      "strike": 100.0,
+      "quantity": 1.0,
+      "multiplier": 100.0,
+      "unit_value": 2.780730664074499,
+      "market_value": 278.0730664074499,
+      "greeks": {
+        "delta": -47.85649114351287,
+        "gamma": 5.612276056605901,
+        "vega_per_vol_point": 11.395018636252585,
+        "rho_per_rate_point": -3.549364859727344,
+        "theta_per_day": -4.545839602526946
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "Unchanged",
+      "date": "2026-09-29",
+      "spot_return": 0.0,
+      "vol_change": 0.0,
+      "pnl": 0.0,
+      "positions": [
+        {
+          "id": "long-call",
+          "strike": 100.0,
+          "expiry": "2026-10-29",
+          "market_value": 293.44526942326985,
+          "pnl": 0.0,
+          "greek_approximation": 0.0,
+          "approximation_residual": 0.0
+        },
+        {
+          "id": "long-put",
+          "strike": 100.0,
+          "expiry": "2026-10-29",
+          "market_value": 278.0730664074499,
+          "pnl": 0.0,
+          "greek_approximation": 0.0,
+          "approximation_residual": 0.0
+        }
+      ]
+    },
+    {
+      "name": "Down 5%, volatility +5 points",
+      "date": "2026-09-30",
+      "spot_return": -0.05,
+      "vol_change": 0.05,
+      "pnl": 197.80632224110704,
+      "positions": [
+        {
+          "id": "long-call",
+          "strike": 100.0,
+          "expiry": "2026-10-29",
+          "market_value": 141.59326898699683,
+          "pnl": -151.85200043627302,
+          "greek_approximation": -139.97702765031798,
+          "approximation_residual": -11.874972785955038
+        },
+        {
+          "id": "long-put",
+          "strike": 100.0,
+          "expiry": "2026-10-29",
+          "market_value": 627.73138908483,
+          "pnl": 349.65832267738006,
+          "greek_approximation": 361.8651600038741,
+          "approximation_residual": -12.206837326494053
+        }
+      ]
+    },
+    {
+      "name": "Up 5%, volatility unchanged",
+      "date": "2026-09-30",
+      "spot_return": 0.05,
+      "vol_change": 0.0,
+      "pnl": 144.60510519226705,
+      "positions": [
+        {
+          "id": "long-call",
+          "strike": 100.0,
+          "expiry": "2026-10-29",
+          "market_value": 615.6540433648807,
+          "pnl": 322.2087739416109,
+          "greek_approximation": 326.0143902849947,
+          "approximation_residual": -3.8056163433838037
+        },
+        {
+          "id": "long-put",
+          "strike": 100.0,
+          "expiry": "2026-10-29",
+          "market_value": 100.46939765810608,
+          "pnl": -177.60366874934385,
+          "greek_approximation": -173.67484461251752,
+          "approximation_residual": -3.9288241368263357
+        }
+      ]
+    },
+    {
+      "name": "Seven calendar days pass",
+      "date": "2026-10-06",
+      "spot_return": 0.0,
+      "vol_change": 0.0,
+      "pnl": -71.05620022020099,
+      "positions": [
+        {
+          "id": "long-call",
+          "strike": 100.0,
+          "expiry": "2026-10-29",
+          "market_value": 256.1407422772106,
+          "pnl": -37.30452714605923,
+          "greek_approximation": -35.367264587889295,
+          "approximation_residual": -1.9372625581699339
+        },
+        {
+          "id": "long-put",
+          "strike": 100.0,
+          "expiry": "2026-10-29",
+          "market_value": 244.32139333330815,
+          "pnl": -33.75167307414176,
+          "greek_approximation": -31.82087721768862,
+          "approximation_residual": -1.9307958564531447
+        }
+      ]
+    }
+  ],
+  "assumptions": [
+    "Single underlying and currency; signed quantities and explicit multipliers.",
+    "European BSM or American CRR, 300 steps; continuous dividend yield.",
+    "Flat per-position volatility; no smile recalibration or historical executable quotes.",
+    "ACT/365 calendar days; rates/dividends unchanged under shocks.",
+    "Model-value changes exclude fees, financing, realised exercise and assignment cash flows.",
+    "Finite-difference Greeks are local approximations; tree Greeks can be unstable.",
+    "Scenarios are hypothetical, not a backtest, prediction or trading recommendation."
+  ]
+}
