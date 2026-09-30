@@ -19,7 +19,7 @@ def main():
         request = json.loads(args.input.read_text(), parse_constant=lambda v: (_ for _ in ()).throw(ValueError(f'Invalid number: {v}')))
         result = analyse(request)
         content = json.dumps(result, indent=2, allow_nan=False)
-        html = render(result) if args.html else None
+        html = render(result, request) if args.html else None
         with args.output.open('x') as handle:
             handle.write(content+'\n')
         if args.html:

@@ -15,6 +15,6 @@ self.onmessage=async({data})=>{try{
  runtime ||= initialize().catch(e=>{runtime=null;throw e});const py=await runtime;
  self.postMessage({progress:'正在重估持仓与情景…'});
  py.globals.set('input_json',JSON.stringify(data.request));
- const response=py.runPython("result = analyse(json.loads(input_json))\njson.dumps({'result':result, 'html':render(result)}, allow_nan=False)");
+ const response=py.runPython("result = analyse(json.loads(input_json))\njson.dumps({'result':result, 'html':render(result, json.loads(input_json))}, allow_nan=False)");
  self.postMessage({id:data.id,...JSON.parse(response)});
 }catch(e){self.postMessage({id:data.id,error:String(e.message||e).trim().split('\n').at(-1)})}};

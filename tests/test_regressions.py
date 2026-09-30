@@ -22,3 +22,14 @@ class RegressionTest(unittest.TestCase):
         result = render(analyse(q))
         self.assertNotIn('<script>', result)
         self.assertIn('&lt;script&gt;', result)
+
+    def test_report_contains_replay_inputs_and_sensitivity_units(self):
+        q = sample()
+        q['positions'][0]['id'] = '<img onerror=alert(1)>'
+        result = render(analyse(q), q)
+        self.assertIn('Annual vol', result)
+        self.assertIn('currency per 1 vol percentage point', result)
+        self.assertIn('Scenario maximum loss is not VaR', result)
+        self.assertIn('european', result)
+        self.assertNotIn('<img', result)
+        self.assertIn('&lt;img', result)
