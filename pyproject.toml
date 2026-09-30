@@ -6,8 +6,15 @@ build-backend = "setuptools.build_meta"
 name = "options-risk-workbench"
 version = "0.1.0"
 description = "Fixed-contract option valuation and transparent portfolio scenarios"
+readme = "README.md"
+license = {file = "LICENSE"}
 requires-python = ">=3.10"
 dependencies = []
+
+[project.urls]
+Homepage = "https://options-risk-zheyuliu.mystic-pear-2111.chatgpt.site"
+Repository = "https://github.com/zheyuliu328/options-risk-workbench"
+Documentation = "https://github.com/zheyuliu328/options-risk-workbench/blob/main/docs/WALKTHROUGH.md"
 
 [project.scripts]
 options-risk = "options_risk.__main__:main"

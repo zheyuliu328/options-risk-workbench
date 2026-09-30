@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "underlying": "SYNTHETIC_ETF",
+  "currency": "USD",
+  "as_of": "2026-09-29",
+  "spot": 99.0,
+  "rate": 0.0,
+  "dividend_yield": 0.0,
+  "market_value": 100.00326241314767,
+  "greeks": {
+    "delta": -99.95420170019989,
+    "gamma": 0.6059691959048933,
+    "vega_per_vol_point": 0.04881455415668925,
+    "rho_per_rate_point": -8.215454095197844,
+    "theta_per_day": -0.0007400384668097143
+  },
+  "positions": [
+    {
+      "id": "long-call",
+      "expiry": "2026-10-29",
+      "strike": 100.0,
+      "quantity": 1.0,
+      "multiplier": 100.0,
+      "unit_value": 1.631206573763158e-05,
+      "market_value": 0.0016312065737631581,
+      "greeks": {
+        "delta": 0.02289914990005941,
+        "gamma": 0.30298459795244664,
+        "vega_per_vol_point": 0.024407277078344624,
+        "rho_per_rate_point": 0.0018619935343751337,
+        "theta_per_day": -0.0003700192330678004
+      }
+    },
+    {
+      "id": "long-put",
+      "expiry": "2026-10-29",
+      "strike": 100.0,
+      "quantity": 1.0,
+      "multiplier": 100.0,
+      "unit_value": 1.000016312065739,
+      "market_value": 100.0016312065739,
+      "greeks": {
+        "delta": -99.97710085009994,
+        "gamma": 0.30298459795244664,
+        "vega_per_vol_point": 0.024407277078344624,
+        "rho_per_rate_point": -8.217316088732218,
+        "theta_per_day": -0.0003700192337419139
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "Unchanged",
+      "date": "2026-09-29",
+      "spot_return": 0.0,
+      "vol_change": 0.0,
+      "pnl": 0.0,
+      "positions": [
+        {
+          "id": "long-call",
+          "strike": 100.0,
+          "expiry": "2026-10-29",
+          "market_value": 0.0016312065737631581,
+          "pnl": 0.0,
+          "greek_approximation": 0.0,
+          "approximation_residual": 0.0
+        },
+        {
+          "id": "long-put",
+          "strike": 100.0,
+          "expiry": "2026-10-29",
+          "market_value": 100.0016312065739,
+          "pnl": 0.0,
+          "greek_approximation": 0.0,
+          "approximation_residual": 0.0
+        }
+      ]
+    },
+    {
+      "name": "Small rise: 0.1%",
+      "date": "2026-09-29",
+      "spot_return": 0.001,
+      "vol_change": 0.0,
+      "pnl": -9.890870347220261,
+      "positions": [
+        {
+          "id": "long-call",
+          "strike": 100.0,
+          "expiry": "2026-10-29",
+          "market_value": 0.006196032963214082,
+          "pnl": 0.004564826389450924,
+          "greek_approximation": 0.0037517918623718467,
+          "approximation_residual": 0.0008130345270790772
+        },
+        {
+          "id": "long-put",
+          "strike": 100.0,
+          "expiry": "2026-10-29",
+          "market_value": 90.10619603296419,
+          "pnl": -9.895435173609712,
+          "greek_approximation": -9.896248208137628,
+          "approximation_residual": 0.0008130345279155904
+        }
+      ]
+    },
+    {
+      "name": "Large rise: 5%",
+      "date": "2026-09-29",
+      "spot_return": 0.05,
+      "vol_change": 0.0,
+      "pnl": 294.9967375868526,
+      "positions": [
+        {
+          "id": "long-call",
+          "strike": 100.0,
+          "expiry": "2026-10-29",
+          "market_value": 395.0000000000003,
+          "pnl": 394.9983687934265,
+          "greek_approximation": 3.8252908476702068,
+          "approximation_residual": 391.1730779457563
+        },
+        {
+          "id": "long-put",
+          "strike": 100.0,
+          "expiry": "2026-10-29",
+          "market_value": 1.4074003380876709e-41,
+          "pnl": -100.0016312065739,
+          "greek_approximation": -491.17470915232985,
+          "approximation_residual": 391.17307794575595
+        }
+      ]
+    }
+  ],
+  "assumptions": [
+    "Single underlying and currency; signed quantities and explicit multipliers.",
+    "European BSM or American CRR, 300 steps; continuous dividend yield.",
+    "Flat per-position volatility; no smile recalibration or historical executable quotes.",
+    "ACT/365 calendar days; rates/dividends unchanged under shocks.",
+    "Model-value changes exclude fees, financing, realised exercise and assignment cash flows.",
+    "Greeks are local sensitivities: analytic European delta/gamma/vega at positive time/volatility; other finite differences and tree Greeks retain numerical error.",
+    "Scenarios are hypothetical, not a backtest, prediction or trading recommendation."
+  ]
+}

@@ -4,9 +4,12 @@
   "access": "public",
   "deployment_status": "succeeded",
   "project_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8",
-  "version_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8~appgver_42cdac24618c8191b5952010c7cd28f3",
-  "deployment_id": "appgdep_6abc7b71868c8191b6c43f2bf7c7d22b",
-  "sites_source_sha": "ced59f75d16c5cfa66f282d4e2c9968e95cd108e",
-  "github_code_sha": "7546067cbeff9e57d2a8613b98e5b0b8600b002c",
-  "verification": "Native deployment succeeded. 32 numerical/report tests; CI 36662262276 success. Real Chromium example/counterexample/custom-file/error-recovery/download/offline-report checks passed, 105 exported numeric fields matched native Python; desktop and 390px viewport checked. Live site entry and standard example rechecked. No external human trial."
+  "version_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8~appgver_be4a7d20fce08191b861d103192439da",
+  "deployment_id": "appgdep_6abc87e0230c819188842a12c1d63372",
+  "sites_source_sha": "89c995459ed1e5f8b897bdc6d2a7386f64d73dc3",
+  "github_runtime_sha": "7987b6085230ca8968b90d979267c641e43c50df",
+  "runtime_ci": 36666186828,
+  "verification": "Deployment status rechecked during presentation wrap-up. Runtime and UI unchanged from the English release; new documentation and samples do not require a new site deployment.",
+  "external_human_trial": "pending",
+  "owner_explanation": "pending"
 }

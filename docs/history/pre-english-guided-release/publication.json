@@ -1,0 +1,12 @@
+{
+  "published_at": "2026-09-30",
+  "url": "https://options-risk-zheyuliu.mystic-pear-2111.chatgpt.site",
+  "access": "public",
+  "deployment_status": "succeeded",
+  "project_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8",
+  "version_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8~appgver_42cdac24618c8191b5952010c7cd28f3",
+  "deployment_id": "appgdep_6abc7b71868c8191b6c43f2bf7c7d22b",
+  "sites_source_sha": "ced59f75d16c5cfa66f282d4e2c9968e95cd108e",
+  "github_code_sha": "7546067cbeff9e57d2a8613b98e5b0b8600b002c",
+  "verification": "Native deployment succeeded. 32 numerical/report tests; CI 36662262276 success. Real Chromium example/counterexample/custom-file/error-recovery/download/offline-report checks passed, 105 exported numeric fields matched native Python; desktop and 390px viewport checked. Live site entry and standard example rechecked. No external human trial."
+}
