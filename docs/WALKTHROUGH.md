@@ -1,18 +1,18 @@
 # Understand and demonstrate Options Risk Workbench
 
-## 中文：从一个问题开始
+## Guided demonstration
 
-这个工具回答：固定持仓不变，如果价格、波动率或时间改变，组合的模型价值怎样变化？它不预测市场方向。网页提供普通跨式与低波动率大冲击反例；例子均虚构。
+The tool asks how the model value of a fixed portfolio changes when spot, volatility or time changes. It does not predict market direction. Both examples are invented.
 
-1. 选择“普通跨式组合”，点“直接体验示例”。买入相同执行价和到期日的看涨与看跌，观察组合敏感度：Delta看一阶方向，Gamma看Delta如何变化，Vega看波动率，Theta看时间。数量和乘数已计入。
-2. 看情景表。模型先按新市场条件重新给每笔合约定价，再减当前价值；这是完整重估。
-3. 看近似差值。Delta/Gamma/Vega/Theta仅在当前点描述局部变化，不能替代大冲击后的完整重估。场景里最大的损失不等于VaR，更不等于理论最大损失。
-4. 选择“大幅冲击：近似失效”。初始价格99、执行价100、波动率1%，上涨5%跨过执行价。比较0.1%和5%的冲击；局部近似甚至可能和完整重估符号不同。
-5. 下载HTML报告及JSON。HTML可独立阅读，JSON包含完整输入和结果，可重新导入。输入自己的持仓时，从空白必填字段开始；数据不上传。
+1. Choose **Standard long straddle**, then **Try an example**. The long call and put share strike and expiry. Delta measures first-order spot exposure; Gamma describes how Delta changes; Vega measures volatility exposure; Theta measures time decay. Quantities and multipliers are included.
+2. Read the scenario table. Each unchanged contract is repriced under the new inputs and its initial value is subtracted: full revaluation.
+3. Compare the local approximation. Initial Delta/Gamma/Vega/Theta describe nearby changes, not arbitrary large shocks. The largest listed scenario loss is neither VaR nor a theoretical maximum loss.
+4. Choose **Large shock: approximation failure**. Spot starts at 99, strike at 100 and volatility at 1%. A 5% rise crosses the strike. Compare the 0.1% and 5% shocks: the approximation can even have the wrong sign.
+5. Download the HTML report and JSON. The report is readable offline; JSON contains inputs and results and can be reimported. **Enter your positions** starts with empty required fields. Inputs stay local.
 
-实现：欧式用含连续股息的BSM；美式用300步CRR树。欧式正时间、正波动率的Delta/Gamma/Vega解析计算；其余敏感度保留树或差分方法。计算在浏览器Worker运行Python。
+Implementation uses BSM with continuous dividends for European options and a 300-step CRR tree for American options. Positive-time, positive-volatility European Delta/Gamma/Vega are analytic; other sensitivities use tree or finite differences. Python runs in a browser worker.
 
-验证故事：独立挑战发现近到期低波动率Gamma的固定差分误差，也发现低波动率Vega偏差。修复后用解析恒等式、高精度参考、有限参数网格和网页导出复算检查。测试通过不是所有极端参数都可靠，更不是生产采纳证明。
+Independent numerical challenges found fixed-bump errors in near-expiry, low-volatility Gamma and in Vega. Repairs were checked using analytic identities, high-precision references, a bounded parameter grid and browser-export recomputation. Passing tests does not establish universal accuracy or production adoption.
 
 ## English introduction — about three minutes at a measured pace
 
@@ -36,4 +36,4 @@ The limits are part of the project. The American tree is sensitive to resolution
 
 ## Personal understanding gate — pending
 
-Without reading this document, explain the two examples in Chinese, give the English introduction, and answer the five follow-ups with units. The user's ability to do this has not been assessed. Do not mark this gate passed merely because the material exists.
+Without reading this document, explain the two examples in English, give the English introduction, and answer the five follow-ups with units. The user's ability to do this has not been assessed. Do not mark this gate passed merely because the material exists.
