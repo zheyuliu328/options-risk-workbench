@@ -1,1 +1,1 @@
-{"name":"options-risk-browser","private":true,"version":"0.1.0","dependencies":{"pyodide":"314.0.6"}}
+{"name":"options-risk-browser","private":true,"version":"0.1.0","dependencies":{"pyodide":"314.0.6"},"devDependencies":{"playwright":"1.62.1"}}

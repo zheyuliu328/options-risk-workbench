@@ -32,3 +32,10 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: node --check web/app.js && node --check web/worker.mjs
       - run: python scripts/build_web.py
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/browser-flow.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-flow-evidence
+          path: outputs/browser-flow/
