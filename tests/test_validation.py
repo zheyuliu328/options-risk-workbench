@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from options_risk.validation import attach_context, investigate, main, reference, render
+from options_risk.validation import attach_context, investigate, main, reference, reference_sensitivities, render
 
 
 def fixture():
@@ -63,6 +63,135 @@ class IndependentReferenceTests(unittest.TestCase):
             d = investigate(fixture())
         self.assertEqual(d['positions'][0]['unit_checks'][0]['status'], 'reference_mesh_unstable')
         self.assertGreater(d['attention_count'], 0)
+
+    def test_one_day_theta_is_expiry_value_change_not_instantaneous_derivative(self):
+        r = fixture()
+        r['positions'][0].update(expiry='2026-09-30', volatility=.2, quantity=-2)
+        r['scenarios'] = [dict(name='next day', days=1)]
+        d = investigate(r)
+        checks = {c['metric']: c for c in d['positions'][0]['unit_checks']}
+        self.assertEqual(len(checks), 6)
+        theta = checks['theta_per_day']
+        self.assertAlmostEqual(theta['reference'], -.4203523730, places=8)
+        self.assertEqual(theta['status'], 'within_threshold')
+        self.assertIn('expiry fixed', theta['convention']['method'])
+        scaled = {c['metric']: c for c in d['positions'][0]['scaled_checks']}
+        self.assertAlmostEqual(scaled['theta_per_day']['reference'], theta['reference'] * -200, places=10)
+        self.assertAlmostEqual(d['scenario_reference'][0]['reference_pnl'], scaled['theta_per_day']['reference'])
+
+    def test_boundary_put_retains_non_green_greeks_and_refinement(self):
+        r = fixture()
+        r.update(spot=95, rate=.08, dividend_yield=0)
+        r['positions'][0].update(kind='put', style='american', volatility=.2, quantity=-2)
+        r['scenarios'] = [dict(name='unchanged')]
+        d = investigate(r)
+        checks = {c['metric']: c for c in d['positions'][0]['unit_checks']}
+        for key in ('vega_per_vol_point', 'theta_per_day'):
+            c = checks[key]
+            self.assertEqual(c['status'], 'investigate')
+            self.assertTrue(c['own_threshold_exceeded'])
+            self.assertLess(abs(c['reference_mesh_difference']), c['reference_mesh_threshold'])
+        self.assertAlmostEqual(checks['vega_per_vol_point']['reference'], .0659718490, places=8)
+        self.assertAlmostEqual(checks['theta_per_day']['reference'], -.0141815817, places=8)
+        self.assertGreater(d['attention_count'], 0)
+        self.assertIn('retrospective', d['policy']['revision'])
+        report = render(d)
+        self.assertIn('Reference mesh difference', report)
+        self.assertIn('theta_per_day', report)
+        self.assertIn('investigate', report)
+
+    def test_new_reference_metric_failure_is_local_and_cannot_turn_green(self):
+        original = reference_sensitivities
+        def failed(*args, **kwargs):
+            result = original(*args, **kwargs)
+            result['rho_per_rate_point'] = None
+            result['errors']['rho_per_rate_point'] = 'Injected unavailable independent rate bump'
+            return result
+        with patch('options_risk.validation.reference_sensitivities', side_effect=failed):
+            d = investigate(fixture())
+        check = next(c for c in d['positions'][0]['unit_checks'] if c['metric'] == 'rho_per_rate_point')
+        self.assertEqual(check['status'], 'reference_unavailable')
+        self.assertGreater(d['attention_count'], 0)
+        self.assertIn('rate bump', render(d))
+
+    def test_each_new_greek_refinement_is_checked_independently(self):
+        original = reference_sensitivities
+        def unstable(*args, **kwargs):
+            result = original(*args, **kwargs)
+            if (len(args) > 5 and args[5] == 800) or kwargs.get('mesh') == 800:
+                result['vega_per_vol_point'] += .01
+            return result
+        with patch('options_risk.validation.reference_sensitivities', side_effect=unstable):
+            d = investigate(fixture())
+        checks = {c['metric']: c for c in d['positions'][0]['unit_checks']}
+        self.assertEqual(checks['vega_per_vol_point']['status'], 'reference_mesh_unstable')
+        self.assertEqual(checks['price']['status'], 'within_threshold')
+
+    def test_invalid_crr_bump_is_not_a_successful_greek_validation(self):
+        from options_risk.pricing import price
+        r = fixture()
+        r.update(rate=.1, dividend_yield=0)
+        r['positions'][0].update(style='american', expiry='2027-09-29', volatility=.1/math.sqrt(300)+.0001)
+        self.assertGreater(price(spot=100,strike=100,years=1,rate=.1,volatility=r['positions'][0]['volatility'],style='american'), 0)
+        with self.assertRaisesRegex(ValueError, 'probability'):
+            investigate(r)
+
+    def test_immediate_exercise_and_near_zero_forward_vega(self):
+        r = fixture()
+        r.update(spot=50, rate=.1, dividend_yield=0)
+        p = r['positions'][0]
+        p.update(kind='put', style='american', expiry='2027-03-28')
+        for vol in (.2, 0):
+            with self.subTest(vol=vol):
+                fine = reference_sensitivities(r, p, r['as_of'], r['spot'], vol)
+                for key in ['vega_per_vol_point', 'rho_per_rate_point', 'theta_per_day']:
+                    self.assertIsNotNone(fine[key])
+                    self.assertLess(abs(fine[key]), 1e-8)
+                if vol == 0:
+                    self.assertIn('forward', fine['conventions']['vega_per_vol_point']['method'])
+
+    def test_forward_vega_nontrivial_low_volatility_reference(self):
+        r = fixture()
+        r.update(rate=0, dividend_yield=0)
+        p = r['positions'][0]
+        p.update(style='american', volatility=.0005)
+        x = reference_sensitivities(r,p,r['as_of'],100,.0005,1600)
+        self.assertAlmostEqual(x['vega_per_vol_point'], .11437336725564884, places=9)
+        self.assertIn('forward',x['conventions']['vega_per_vol_point']['method'])
+        self.assertEqual(x['conventions']['vega_per_vol_point']['volatility_bump'], .001)
+
+    def test_unsupported_degenerate_reference_is_fail_loud(self):
+        r = fixture()
+        r.update(rate=0, dividend_yield=0)
+        p = r['positions'][0]
+        p.update(style='american', volatility=0)
+        with self.assertRaises(RuntimeError):
+            reference_sensitivities(r,p,r['as_of'],100,0,800)
+
+    def test_negative_rate_rho_keeps_its_sign_and_units(self):
+        r = fixture()
+        r.update(rate=-.05, dividend_yield=.02)
+        p = r['positions'][0]
+        p.update(kind='put', style='american', expiry='2027-09-29', volatility=.2)
+        x = reference_sensitivities(r, p, r['as_of'], 100, .2, 800)
+        self.assertAlmostEqual(x['rho_per_rate_point'], -.70818618, places=7)
+        self.assertEqual(x['conventions']['rho_per_rate_point']['rate_bump'], .0001)
+
+    def test_failed_independent_bump_preserves_other_metrics(self):
+        original = reference
+        r = fixture()
+        p = r['positions'][0]
+        p['style'] = 'american'
+        def failed(*args, **kwargs):
+            if args[4] > p['volatility']:
+                raise RuntimeError('Injected invalid reference volatility bump')
+            return original(*args, **kwargs)
+        with patch('options_risk.validation.reference', side_effect=failed):
+            result = reference_sensitivities(r,p,r['as_of'],100,p['volatility'],800)
+        self.assertIsNone(result['vega_per_vol_point'])
+        self.assertIn('volatility bump',result['errors']['vega_per_vol_point'])
+        self.assertTrue(math.isfinite(result['rho_per_rate_point']))
+        self.assertTrue(math.isfinite(result['theta_per_day']))
 
     def test_offline_report_contains_inputs_and_escapes_identifiers(self):
         r = fixture()

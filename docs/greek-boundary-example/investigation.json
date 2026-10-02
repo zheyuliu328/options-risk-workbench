@@ -1,0 +1,500 @@
+{
+  "policy": {
+    "meaning": "Versioned investigation thresholds, not model approval bounds; new Greek thresholds are retrospective screening choices",
+    "european": {
+      "price_abs": 1e-08,
+      "price_rel": 1e-10,
+      "delta_abs": 1e-08,
+      "gamma_abs": 1e-09,
+      "vega_per_vol_point_abs": 1e-08,
+      "rho_per_rate_point_abs": 1e-08,
+      "theta_per_day_abs": 1e-08
+    },
+    "american": {
+      "price_abs": 0.01,
+      "price_rel": 0.001,
+      "delta_abs": 0.005,
+      "delta_rel": 0.01,
+      "gamma_abs": 0.0005,
+      "gamma_rel": 0.05,
+      "vega_per_vol_point_abs": 0.0001,
+      "vega_per_vol_point_rel": 0.01,
+      "rho_per_rate_point_abs": 0.0001,
+      "rho_per_rate_point_rel": 0.01,
+      "theta_per_day_abs": 0.0001,
+      "theta_per_day_rel": 0.01
+    },
+    "tree_steps": [
+      150,
+      151,
+      300,
+      301,
+      600,
+      601
+    ],
+    "fd_meshes": [
+      800,
+      1600
+    ],
+    "reference_refinement_fraction": 0.25,
+    "revision": "3: convention-matched Vega/Rho/one-day Theta; retrospective screening, not blind validation"
+  },
+  "quantlib_version": "1.43",
+  "request": {
+    "as_of": "2026-01-01",
+    "underlying": "INVENTED_BOUNDARY",
+    "currency": "USD",
+    "spot": 95,
+    "rate": 0.08,
+    "dividend_yield": 0,
+    "positions": [
+      {
+        "id": "boundary-put",
+        "kind": "put",
+        "style": "american",
+        "strike": 100,
+        "expiry": "2026-01-31",
+        "quantity": -2,
+        "multiplier": 100,
+        "volatility": 0.2
+      }
+    ],
+    "scenarios": [
+      {
+        "name": "Unchanged",
+        "spot_return": 0,
+        "vol_change": 0,
+        "days": 0
+      },
+      {
+        "name": "One calendar day later",
+        "spot_return": 0,
+        "vol_change": 0,
+        "days": 1
+      },
+      {
+        "name": "Spot down two percent",
+        "spot_return": -0.02,
+        "vol_change": 0,
+        "days": 0
+      }
+    ]
+  },
+  "workbench": {
+    "schema_version": 1,
+    "underlying": "INVENTED_BOUNDARY",
+    "currency": "USD",
+    "as_of": "2026-01-01",
+    "spot": 95.0,
+    "rate": 0.08,
+    "dividend_yield": 0.0,
+    "market_value": -1050.4070585752759,
+    "greeks": {
+      "delta": 165.2937089896658,
+      "gamma": -13.161189112822838,
+      "vega_per_vol_point": -13.449467149516892,
+      "rho_per_rate_point": 5.864733490970053,
+      "theta_per_day": 2.936541127948722
+    },
+    "positions": [
+      {
+        "id": "boundary-put",
+        "expiry": "2026-01-31",
+        "strike": 100.0,
+        "quantity": -2.0,
+        "multiplier": 100.0,
+        "unit_value": 5.252035292876379,
+        "market_value": -1050.4070585752759,
+        "greeks": {
+          "delta": 165.2937089896658,
+          "gamma": -13.161189112822838,
+          "vega_per_vol_point": -13.449467149516892,
+          "rho_per_rate_point": 5.864733490970053,
+          "theta_per_day": 2.936541127948722
+        }
+      }
+    ],
+    "scenarios": [
+      {
+        "name": "Unchanged",
+        "date": "2026-01-01",
+        "spot_return": 0.0,
+        "vol_change": 0.0,
+        "pnl": 0.0,
+        "positions": [
+          {
+            "id": "boundary-put",
+            "strike": 100.0,
+            "expiry": "2026-01-31",
+            "market_value": -1050.4070585752759,
+            "pnl": 0.0,
+            "greek_approximation": 0.0,
+            "approximation_residual": 0.0
+          }
+        ]
+      },
+      {
+        "name": "One calendar day later",
+        "date": "2026-01-02",
+        "spot_return": 0.0,
+        "vol_change": 0.0,
+        "pnl": 2.936541127948658,
+        "positions": [
+          {
+            "id": "boundary-put",
+            "strike": 100.0,
+            "expiry": "2026-01-31",
+            "market_value": -1047.4705174473272,
+            "pnl": 2.936541127948658,
+            "greek_approximation": 2.936541127948722,
+            "approximation_residual": -6.394884621840902e-14
+          }
+        ]
+      },
+      {
+        "name": "Spot down two percent",
+        "date": "2026-01-01",
+        "spot_return": -0.02,
+        "vol_change": 0.0,
+        "pnl": -336.33111814913946,
+        "positions": [
+          {
+            "id": "boundary-put",
+            "strike": 100.0,
+            "expiry": "2026-01-31",
+            "market_value": -1386.7381767244153,
+            "pnl": -336.33111814913946,
+            "greek_approximation": -337.8139934290103,
+            "approximation_residual": 1.4828752798708251
+          }
+        ]
+      }
+    ],
+    "assumptions": [
+      "Single underlying and currency; signed quantities and explicit multipliers.",
+      "European BSM or American CRR, 300 steps; continuous dividend yield.",
+      "Flat per-position volatility; no smile recalibration or historical executable quotes.",
+      "ACT/365 calendar days; rates/dividends unchanged under shocks.",
+      "Model-value changes exclude fees, financing, realised exercise and assignment cash flows.",
+      "Greeks are local sensitivities: analytic European delta/gamma/vega at positive time/volatility; other finite differences and tree Greeks retain numerical error.",
+      "Scenarios are hypothetical, not a backtest, prediction or trading recommendation."
+    ]
+  },
+  "positions": [
+    {
+      "id": "boundary-put",
+      "unit_checks": [
+        {
+          "metric": "price",
+          "convention": {
+            "unit": "currency per underlying unit",
+            "method": "independent engine price"
+          },
+          "own": 5.252035292876379,
+          "reference": 5.2515824312304975,
+          "difference": 0.0004528616458818746,
+          "threshold": 0.01,
+          "reference_mesh_difference": 9.786220162943948e-05,
+          "reference_mesh_threshold": 0.0025,
+          "own_threshold_exceeded": false,
+          "status": "within_threshold"
+        },
+        {
+          "metric": "delta",
+          "convention": {
+            "unit": "currency per spot unit",
+            "method": "independent engine derivative"
+          },
+          "own": -0.8264685449483289,
+          "reference": -0.8263371919391498,
+          "difference": -0.00013135300917910264,
+          "threshold": 0.008263371919391497,
+          "reference_mesh_difference": -3.409884850480438e-06,
+          "reference_mesh_threshold": 0.0020658429798478743,
+          "own_threshold_exceeded": false,
+          "status": "within_threshold"
+        },
+        {
+          "metric": "gamma",
+          "convention": {
+            "unit": "currency per squared spot unit",
+            "method": "independent engine derivative"
+          },
+          "own": 0.06580594556411419,
+          "reference": 0.06580219379368628,
+          "difference": 3.7517704279121933e-06,
+          "threshold": 0.0032901096896843143,
+          "reference_mesh_difference": -1.1448322774915143e-06,
+          "reference_mesh_threshold": 0.0008225274224210786,
+          "own_threshold_exceeded": false,
+          "status": "within_threshold"
+        },
+        {
+          "metric": "vega_per_vol_point",
+          "convention": {
+            "unit": "currency per +0.01 absolute volatility",
+            "method": "central volatility difference",
+            "volatility_bump": 0.001
+          },
+          "own": 0.06724733574758446,
+          "reference": 0.06597184899682862,
+          "difference": 0.0012754867507558387,
+          "threshold": 0.0006597184899682862,
+          "reference_mesh_difference": -1.3830399048231357e-07,
+          "reference_mesh_threshold": 0.00016492962249207155,
+          "own_threshold_exceeded": true,
+          "status": "investigate"
+        },
+        {
+          "metric": "rho_per_rate_point",
+          "convention": {
+            "unit": "currency per +0.01 continuous annual rate",
+            "method": "central rate difference, dividend yield held fixed",
+            "rate_bump": 0.0001
+          },
+          "own": -0.029323667454850266,
+          "reference": -0.029289914725927346,
+          "difference": -3.375272892292003e-05,
+          "threshold": 0.00029289914725927346,
+          "reference_mesh_difference": 1.046252648961854e-05,
+          "reference_mesh_threshold": 7.322478681481837e-05,
+          "own_threshold_exceeded": false,
+          "status": "within_threshold"
+        },
+        {
+          "metric": "theta_per_day",
+          "convention": {
+            "unit": "currency per one calendar day elapsed",
+            "method": "valuation date +1 calendar day, expiry fixed",
+            "calendar_days": 1
+          },
+          "own": -0.01468270563974361,
+          "reference": -0.014181581721613767,
+          "difference": -0.0005011239181298421,
+          "threshold": 0.00014181581721613767,
+          "reference_mesh_difference": -2.8108976648510975e-06,
+          "reference_mesh_threshold": 3.5453954304034417e-05,
+          "own_threshold_exceeded": true,
+          "status": "investigate"
+        }
+      ],
+      "signed_exposure": -200,
+      "scaled_checks": [
+        {
+          "metric": "price",
+          "own": -1050.4070585752759,
+          "reference": -1050.3164862460994,
+          "difference": -0.09057232917637492,
+          "status": "within_threshold"
+        },
+        {
+          "metric": "delta",
+          "own": 165.2937089896658,
+          "reference": 165.26743838782997,
+          "difference": 0.02627060183582053,
+          "status": "within_threshold"
+        },
+        {
+          "metric": "gamma",
+          "own": -13.161189112822838,
+          "reference": -13.160438758737255,
+          "difference": -0.0007503540855824387,
+          "status": "within_threshold"
+        },
+        {
+          "metric": "vega_per_vol_point",
+          "own": -13.449467149516892,
+          "reference": -13.194369799365724,
+          "difference": -0.25509735015116775,
+          "status": "investigate"
+        },
+        {
+          "metric": "rho_per_rate_point",
+          "own": 5.864733490970053,
+          "reference": 5.857982945185469,
+          "difference": 0.0067505457845840056,
+          "status": "within_threshold"
+        },
+        {
+          "metric": "theta_per_day",
+          "own": 2.936541127948722,
+          "reference": 2.8363163443227535,
+          "difference": 0.10022478362596843,
+          "status": "investigate"
+        }
+      ],
+      "reference_800": {
+        "price": 5.251484569028868,
+        "delta": -0.8263337820542993,
+        "gamma": 0.06580333862596377,
+        "errors": {},
+        "conventions": {
+          "price": {
+            "unit": "currency per underlying unit",
+            "method": "independent engine price"
+          },
+          "delta": {
+            "unit": "currency per spot unit",
+            "method": "independent engine derivative"
+          },
+          "gamma": {
+            "unit": "currency per squared spot unit",
+            "method": "independent engine derivative"
+          },
+          "vega_per_vol_point": {
+            "unit": "currency per +0.01 absolute volatility",
+            "method": "central volatility difference",
+            "volatility_bump": 0.001
+          },
+          "rho_per_rate_point": {
+            "unit": "currency per +0.01 continuous annual rate",
+            "method": "central rate difference, dividend yield held fixed",
+            "rate_bump": 0.0001
+          },
+          "theta_per_day": {
+            "unit": "currency per one calendar day elapsed",
+            "method": "valuation date +1 calendar day, expiry fixed",
+            "calendar_days": 1
+          }
+        },
+        "vega_per_vol_point": 0.0659719873008191,
+        "rho_per_rate_point": -0.029300377252416965,
+        "theta_per_day": -0.014178770823948916
+      },
+      "reference_1600": {
+        "price": 5.2515824312304975,
+        "delta": -0.8263371919391498,
+        "gamma": 0.06580219379368628,
+        "errors": {},
+        "conventions": {
+          "price": {
+            "unit": "currency per underlying unit",
+            "method": "independent engine price"
+          },
+          "delta": {
+            "unit": "currency per spot unit",
+            "method": "independent engine derivative"
+          },
+          "gamma": {
+            "unit": "currency per squared spot unit",
+            "method": "independent engine derivative"
+          },
+          "vega_per_vol_point": {
+            "unit": "currency per +0.01 absolute volatility",
+            "method": "central volatility difference",
+            "volatility_bump": 0.001
+          },
+          "rho_per_rate_point": {
+            "unit": "currency per +0.01 continuous annual rate",
+            "method": "central rate difference, dividend yield held fixed",
+            "rate_bump": 0.0001
+          },
+          "theta_per_day": {
+            "unit": "currency per one calendar day elapsed",
+            "method": "valuation date +1 calendar day, expiry fixed",
+            "calendar_days": 1
+          }
+        },
+        "vega_per_vol_point": 0.06597184899682862,
+        "rho_per_rate_point": -0.029289914725927346,
+        "theta_per_day": -0.014181581721613767
+      },
+      "fd_price_refinement": 9.786220162943948e-05,
+      "tree_diagnostics": [
+        {
+          "steps": 150,
+          "price": 5.253207539258294,
+          "delta": -0.8262978834665589,
+          "gamma": 0.06581931445426288,
+          "vega_per_vol_point": 0.0662456223552832,
+          "rho_per_rate_point": -0.029382233870700603,
+          "theta_per_day": -0.014347848259509632
+        },
+        {
+          "steps": 151,
+          "price": 5.2503733363759455,
+          "delta": -0.827250705345835,
+          "gamma": 0.06585594689811886,
+          "vega_per_vol_point": 0.06519692547015232,
+          "rho_per_rate_point": -0.029233254877647497,
+          "theta_per_day": -0.013217437262333931
+        },
+        {
+          "steps": 300,
+          "price": 5.252035292876379,
+          "delta": -0.8264685449483289,
+          "gamma": 0.06580594556411419,
+          "vega_per_vol_point": 0.06724733574758446,
+          "rho_per_rate_point": -0.029323667454850266,
+          "theta_per_day": -0.01468270563974361
+        },
+        {
+          "steps": 301,
+          "price": 5.252154604546242,
+          "delta": -0.8264251653023194,
+          "gamma": 0.06580557543242889,
+          "vega_per_vol_point": 0.0649763494810518,
+          "rho_per_rate_point": -0.029268744196864205,
+          "theta_per_day": -0.013961551514666937
+        },
+        {
+          "steps": 600,
+          "price": 5.251438424437554,
+          "delta": -0.8265476346479574,
+          "gamma": 0.06581368245081191,
+          "vega_per_vol_point": 0.06683691871652186,
+          "rho_per_rate_point": -0.029260885908044543,
+          "theta_per_day": -0.013909032619119799
+        },
+        {
+          "steps": 601,
+          "price": 5.252064339627508,
+          "delta": -0.8263362639547778,
+          "gamma": 0.06580459010339489,
+          "vega_per_vol_point": 0.06597539140830833,
+          "rho_per_rate_point": -0.029303573409711348,
+          "theta_per_day": -0.014279107042035832
+        }
+      ]
+    }
+  ],
+  "scenario_reference": [
+    {
+      "name": "Unchanged",
+      "workbench_pnl": 0.0,
+      "reference_pnl": 0.0,
+      "engine_pnl_difference": 0.0,
+      "workbench_local_approximation": 0.0,
+      "workbench_approximation_residual": 0.0
+    },
+    {
+      "name": "One calendar day later",
+      "workbench_pnl": 2.936541127948658,
+      "reference_pnl": 2.8363163443227677,
+      "engine_pnl_difference": 0.10022478362589027,
+      "workbench_local_approximation": 2.936541127948722,
+      "workbench_approximation_residual": -6.394884621840902e-14
+    },
+    {
+      "name": "Spot down two percent",
+      "workbench_pnl": -336.33111814913946,
+      "reference_pnl": -336.4290650588555,
+      "engine_pnl_difference": 0.09794690971602904,
+      "workbench_local_approximation": -337.8139934290103,
+      "workbench_approximation_residual": 1.4828752798708251
+    }
+  ],
+  "limits": [
+    "Independent engines agree only conditional on shared input conventions.",
+    "American FDM refinement and CRR oscillation are diagnostics, not exact error bounds.",
+    "All five reported Greeks are compared with matched units; method differences remain explicit.",
+    "New Greek thresholds are retrospective screening choices, not independently calibrated approval bounds.",
+    "Workbench theta is a one-calendar-day change, not QuantLib instantaneous theta.",
+    "No market quotation, source authenticity, profit or model approval is certified.",
+    "Expiry Greeks are nonsmooth and are not compared as differentiable values.",
+    "An unavailable base reference or production Greek fails the investigation explicitly; no complete report is claimed.",
+    "Exact-zero American volatility can make the independent FDM grid degenerate; no positive volatility is substituted."
+  ],
+  "attention_count": 2,
+  "input_sha256": "9078ed7e4aeff6bf5bf43587d406f508816caf80b4e4257cc3fd91d0facc1f8b"
+}

@@ -1,0 +1,40 @@
+{
+  "as_of": "2026-01-01",
+  "underlying": "INVENTED_BOUNDARY",
+  "currency": "USD",
+  "spot": 95,
+  "rate": 0.08,
+  "dividend_yield": 0,
+  "positions": [
+    {
+      "id": "boundary-put",
+      "kind": "put",
+      "style": "american",
+      "strike": 100,
+      "expiry": "2026-01-31",
+      "quantity": -2,
+      "multiplier": 100,
+      "volatility": 0.2
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "Unchanged",
+      "spot_return": 0,
+      "vol_change": 0,
+      "days": 0
+    },
+    {
+      "name": "One calendar day later",
+      "spot_return": 0,
+      "vol_change": 0,
+      "days": 1
+    },
+    {
+      "name": "Spot down two percent",
+      "spot_return": -0.02,
+      "vol_change": 0,
+      "days": 0
+    }
+  ]
+}

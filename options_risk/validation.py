@@ -12,16 +12,21 @@ from .scenarios import analyse
 
 
 POLICY = {
-    "meaning": "Predeclared investigation thresholds, not model approval bounds",
+    "meaning": "Versioned investigation thresholds, not model approval bounds; new Greek thresholds are retrospective screening choices",
     "european": {"price_abs": 1e-8, "price_rel": 1e-10,
-                 "delta_abs": 1e-8, "gamma_abs": 1e-9},
+                 "delta_abs": 1e-8, "gamma_abs": 1e-9,
+                 "vega_per_vol_point_abs": 1e-8, "rho_per_rate_point_abs": 1e-8,
+                 "theta_per_day_abs": 1e-8},
     "american": {"price_abs": .01, "price_rel": .001,
                  "delta_abs": .005, "delta_rel": .01,
-                 "gamma_abs": .0005, "gamma_rel": .05},
+                 "gamma_abs": .0005, "gamma_rel": .05,
+                 "vega_per_vol_point_abs": .0001, "vega_per_vol_point_rel": .01,
+                 "rho_per_rate_point_abs": .0001, "rho_per_rate_point_rel": .01,
+                 "theta_per_day_abs": .0001, "theta_per_day_rel": .01},
     "tree_steps": [150, 151, 300, 301, 600, 601],
     "fd_meshes": [800, 1600],
     "reference_refinement_fraction": .25,
-    "revision": "2: independent review added reference mesh classification; retrospective diagnostics",
+    "revision": "3: convention-matched Vega/Rho/one-day Theta; retrospective screening, not blind validation",
 }
 
 
@@ -53,9 +58,79 @@ def reference(request, position, valuation_date, spot, volatility, mesh=1600):
         engine = (ql.AnalyticEuropeanEngine(process) if position['style'] == 'european'
                   else ql.FdBlackScholesVanillaEngine(process, mesh, mesh, 2))
         option.setPricingEngine(engine)
-        return {"price": option.NPV(), "delta": option.delta(), "gamma": option.gamma()}
+        result = {"price": option.NPV(), "delta": option.delta(), "gamma": option.gamma()}
+        if position['style'] == 'european' and volatility > 0:
+            result['analytic_vega_per_vol_point'] = option.vega() * .01
+        return result
     finally:
         settings.evaluationDate = previous
+
+
+METRICS = ['price', 'delta', 'gamma', 'vega_per_vol_point',
+           'rho_per_rate_point', 'theta_per_day']
+
+
+def reference_sensitivities(request, position, valuation_date, spot, volatility, mesh=1600):
+    """Independent engines with production units and explicit difference conventions."""
+    base = reference(request, position, valuation_date, spot, volatility, mesh)
+    day = date.fromisoformat(valuation_date)
+    expiry = date.fromisoformat(position['expiry'])
+    dv = max(.001, volatility * .001)
+    output = dict(base)
+    output['errors'] = {}
+    output['conventions'] = {
+        'price': {'unit': 'currency per underlying unit', 'method': 'independent engine price'},
+        'delta': {'unit': 'currency per spot unit', 'method': 'independent engine derivative'},
+        'gamma': {'unit': 'currency per squared spot unit', 'method': 'independent engine derivative'},
+        'vega_per_vol_point': {
+            'unit': 'currency per +0.01 absolute volatility',
+            'method': ('analytic European Vega' if position['style'] == 'european' and volatility > 0
+                       else 'central volatility difference' if volatility >= dv
+                       else 'second-order forward volatility difference'),
+            'volatility_bump': None if position['style'] == 'european' and volatility > 0 else dv},
+        'rho_per_rate_point': {'unit': 'currency per +0.01 continuous annual rate',
+                              'method': 'central rate difference, dividend yield held fixed',
+                              'rate_bump': .0001},
+        'theta_per_day': {'unit': 'currency per one calendar day elapsed',
+                          'method': 'valuation date +1 calendar day, expiry fixed',
+                          'calendar_days': 1},
+    }
+    if day >= expiry:
+        for key in METRICS[1:]:
+            output[key] = None
+            output['errors'][key] = 'Expiry derivatives are not compared as smooth sensitivities.'
+        return output
+
+    def value(*, rate=None, vol=volatility, when=valuation_date):
+        changed = dict(request)
+        if rate is not None:
+            changed['rate'] = rate
+        return reference(changed, position, when, spot, vol, mesh)['price']
+
+    def vega():
+        if position['style'] == 'european' and volatility > 0:
+            return base['analytic_vega_per_vol_point']
+        if volatility >= dv:
+            return (value(vol=volatility + dv) - value(vol=volatility - dv)) / (2 * dv) * .01
+        return (-3 * base['price'] + 4 * value(vol=volatility + dv)
+                - value(vol=volatility + 2 * dv)) / (2 * dv) * .01
+
+    rate = request.get('rate', 0)
+    methods = {
+        'vega_per_vol_point': vega,
+        'rho_per_rate_point': lambda: (value(rate=rate + .0001) - value(rate=rate - .0001)) / .0002 * .01,
+        'theta_per_day': lambda: value(when=(day + timedelta(days=1)).isoformat()) - base['price'],
+    }
+    for key, method in methods.items():
+        try:
+            result = method()
+            if not math.isfinite(result):
+                raise ValueError('Independent Greek is non-finite.')
+            output[key] = result
+        except (RuntimeError, ValueError, OverflowError, ZeroDivisionError) as exc:
+            output[key] = None
+            output['errors'][key] = str(exc)
+    return output
 
 
 def investigate(request):
@@ -67,25 +142,31 @@ def investigate(request):
               "scenario_reference": [], "limits": [
                   "Independent engines agree only conditional on shared input conventions.",
                   "American FDM refinement and CRR oscillation are diagnostics, not exact error bounds.",
-                  "Only price, delta and gamma have independent Greek comparisons here.",
+                  "All five reported Greeks are compared with matched units; method differences remain explicit.",
+                  "New Greek thresholds are retrospective screening choices, not independently calibrated approval bounds.",
                   "Workbench theta is a one-calendar-day change, not QuantLib instantaneous theta.",
                   "No market quotation, source authenticity, profit or model approval is certified.",
-                  "Expiry Greeks are nonsmooth and are not compared as differentiable values."]}
+                  "Expiry Greeks are nonsmooth and are not compared as differentiable values.",
+                  "An unavailable base reference or production Greek fails the investigation explicitly; no complete report is claimed.",
+                  "Exact-zero American volatility can make the independent FDM grid degenerate; no positive volatility is substituted."]}
     for position in request['positions']:
         args = dict(spot=request['spot'], strike=position['strike'],
                     years=(date.fromisoformat(position['expiry']) - start).days / 365,
                     rate=request.get('rate', 0), dividend_yield=request.get('dividend_yield', 0),
                     volatility=position['volatility'], kind=position['kind'], style=position['style'])
-        fine = reference(request, position, request['as_of'], request['spot'], position['volatility'])
-        coarse = reference(request, position, request['as_of'], request['spot'],
+        fine = reference_sensitivities(request, position, request['as_of'], request['spot'], position['volatility'])
+        coarse = reference_sensitivities(request, position, request['as_of'], request['spot'],
                            position['volatility'], 800)
         own = {"price": price(**args), **greeks(**args)}
         policy = POLICY[position['style']]
         checks = []
-        for metric in ['price', 'delta', 'gamma']:
+        for metric in METRICS:
             expected = fine[metric]
-            if expected is None:
-                checks.append({"metric": metric, "status": "not_compared_at_expiry"})
+            if expected is None or coarse.get(metric) is None:
+                checks.append({"metric": metric, "own": own.get(metric), "reference": expected,
+                               "status": "reference_unavailable",
+                               "detail": fine['errors'].get(metric) or coarse['errors'].get(metric),
+                               "convention": fine['conventions'][metric]})
                 continue
             threshold = max(policy[metric + '_abs'],
                             policy.get(metric + '_rel', 0) * abs(expected))
@@ -93,7 +174,8 @@ def investigate(request):
             refinement = expected - coarse[metric]
             reference_threshold = threshold * POLICY['reference_refinement_fraction']
             reference_stable = abs(refinement) <= reference_threshold
-            checks.append({"metric": metric, "own": own[metric], "reference": expected,
+            checks.append({"metric": metric, "convention": fine["conventions"][metric],
+                           "own": own[metric], "reference": expected,
                            "difference": difference, "threshold": threshold,
                            "reference_mesh_difference": refinement,
                            "reference_mesh_threshold": reference_threshold,
@@ -108,7 +190,13 @@ def investigate(request):
                                  **greeks(**args, steps=steps)})
                 except ValueError as exc:
                     tree.append({"steps": steps, "error": str(exc)})
+        exposure = position['quantity'] * position['multiplier']
+        scaled = [{"metric": c['metric'], "own": c.get('own') * exposure if c.get('own') is not None else None,
+                   "reference": c.get('reference') * exposure if c.get('reference') is not None else None,
+                   "difference": c.get('difference') * exposure if c.get('difference') is not None else None,
+                   "status": c['status']} for c in checks]
         output['positions'].append({"id": position['id'], "unit_checks": checks,
+                                    "signed_exposure": exposure, "scaled_checks": scaled,
                                     "reference_800": coarse, "reference_1600": fine,
                                     "fd_price_refinement": fine['price'] - coarse['price'],
                                     "tree_diagnostics": tree})
@@ -127,7 +215,7 @@ def investigate(request):
             "engine_pnl_difference": actual['pnl'] - (value - reference_base),
             "workbench_local_approximation": approximate,
             "workbench_approximation_residual": actual['pnl'] - approximate})
-    output['attention_count'] = sum(c['status'] in ['investigate', 'reference_mesh_unstable']
+    output['attention_count'] = sum(c['status'] in ['investigate', 'reference_mesh_unstable', 'reference_unavailable']
         for p in output['positions'] for c in p['unit_checks'])
     return output
 
@@ -172,11 +260,18 @@ def render(investigation):
         for row in investigation['scenario_reference'])
     unit_rows = ''.join('<tr>' + ''.join('<td>' + esc(value) + '</td>' for value in
         [p['id'], c['metric'], c.get('own', 'not compared'), c.get('reference', ''),
-         c.get('difference', ''), c.get('threshold', ''), c['status']]) + '</tr>'
+         c.get('difference', ''), c.get('threshold', ''), c.get('reference_mesh_difference', ''),
+         c.get('reference_mesh_threshold', ''), c['status'], c.get('convention', {}).get('unit', ''),
+         c.get('detail') or c.get('convention', {}).get('method', '')]) + '</tr>'
         for p in investigation['positions'] for c in p['unit_checks'])
     tree_rows = ''.join('<tr>' + ''.join('<td>' + esc(value) + '</td>' for value in
-        [p['id'], t['steps'], t.get('price', t.get('error')), t.get('delta', ''), t.get('gamma', '')])
+        [p['id'], t['steps'], t.get('price', t.get('error')), t.get('delta', ''), t.get('gamma', ''),
+         t.get('vega_per_vol_point', ''), t.get('rho_per_rate_point', ''), t.get('theta_per_day', '')])
         + '</tr>' for p in investigation['positions'] for t in p['tree_diagnostics'])
+    scaled_rows = ''.join('<tr>' + ''.join('<td>' + esc(value) + '</td>' for value in
+        [p['id'], p['signed_exposure'], c['metric'], c.get('own'), c.get('reference'),
+         c.get('difference'), c['status']]) + '</tr>'
+        for p in investigation['positions'] for c in p['scaled_checks'])
     quote_rows = ''.join('<tr>' + ''.join('<td>' + esc(q[k]) + '</td>' for k in
         ['id', 'bid', 'ask', 'model_price', 'model_minus_mid', 'inside_supplied_spread']) + '</tr>'
         for q in investigation.get('quote_diagnostics', []))
@@ -199,7 +294,7 @@ This report is not market-price certification, trading performance or VaR.</p>
 ''' + portfolio + '''<h2>Scenario P&amp;L and approximation residual</h2><div class="scroll"><table><tr>
 <th>Scenario</th><th>Workbench P&amp;L</th><th>Reference P&amp;L</th>
 <th>Engine difference</th><th>Local approximation</th><th>Approximation residual</th></tr>''' + rows + '''</table></div>
-''' + source_section + '''<h2>Independent unit-level checks</h2><p>Price, Delta and Gamma are compared before quantity and multiplier scaling. Thresholds flag investigation, not acceptance.</p><div class="scroll"><table><tr><th>Position</th><th>Metric</th><th>Workbench</th><th>Reference</th><th>Difference</th><th>Threshold</th><th>Status</th></tr>''' + unit_rows + '''</table></div><h2>CRR step sensitivity</h2><p>Odd/even sequences may oscillate. More steps do not guarantee monotonic improvement.</p><div class="scroll"><table><tr><th>Position</th><th>Steps</th><th>Unit price</th><th>Delta</th><th>Gamma</th></tr>''' + tree_rows + '''</table></div><h2>Interpretation and limits</h2><ul>''' + ''.join('<li>' + esc(x) + '</li>' for x in investigation['limits']) + '''</ul>
+''' + source_section + '''<h2>Independent unit-level checks</h2><p>Price and all five reported Greeks are compared before signed quantity and multiplier scaling. Vega is per volatility point, Rho per rate point and Theta is the next-calendar-day value change. Reference refinement is calculated separately for each sensitivity. Thresholds flag investigation, not acceptance; added Greek screening thresholds are retrospective.</p><div class="scroll"><table><tr><th>Position</th><th>Metric</th><th>Workbench</th><th>Reference</th><th>Difference</th><th>Threshold</th><th>Reference mesh difference</th><th>Mesh threshold</th><th>Status</th><th>Unit</th><th>Method / unavailable reason</th></tr>''' + unit_rows + '''</table></div><h2>CRR step sensitivity</h2><p>Odd/even sequences may oscillate. More steps do not guarantee monotonic improvement.</p><div class="scroll"><table><tr><th>Position</th><th>Steps</th><th>Unit price</th><th>Delta</th><th>Gamma</th><th>Vega / point</th><th>Rho / point</th><th>Theta / day</th></tr>''' + tree_rows + '''</table></div><h2>Signed position comparisons</h2><p>Unit values are multiplied by quantity × multiplier. A short position reverses the sign. Unit-level status is retained; no portfolio acceptance threshold is inferred.</p><div class="scroll"><table><tr><th>Position</th><th>Signed exposure</th><th>Metric</th><th>Workbench</th><th>Reference</th><th>Difference</th><th>Unit status</th></tr>''' + scaled_rows + '''</table></div><h2>Interpretation and limits</h2><ul>''' + ''.join('<li>' + esc(x) + '</li>' for x in investigation['limits']) + '''</ul>
 <details><summary>Frozen inputs, methods and complete diagnostics</summary><p>Includes 800/1600 FDM refinement. Numerical agreement does not establish source quality.</p><pre>''' + esc(json.dumps(investigation, indent=2, allow_nan=False)) + '</pre></details></main></html>'
 
 

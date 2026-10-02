@@ -70,7 +70,7 @@ MIT licensed. Third-party browser runtime notices remain in the public build.
 
 ## Independent revaluation investigation
 
-The optional offline validator compares fixed contracts against QuantLib analytic/finite-difference engines, reports reference-grid stability and odd/even CRR step sensitivity, and independently rebuilds full scenario revaluation. [Run the task and inspect invented evidence](docs/INDEPENDENT_VALIDATION.md). It is separate from the published browser runtime; source-backed quote inputs and their derived outputs remain local.
+The optional offline validator compares fixed contracts against QuantLib analytic/finite-difference engines, reports price and all five Greeks with matched units and per-metric reference-grid stability, retains odd/even CRR step sensitivity, and independently rebuilds full scenario revaluation. [Run the task and inspect invented evidence](docs/INDEPENDENT_VALIDATION.md). It is separate from the published browser runtime; source-backed quote inputs and their derived outputs remain local.
 
 ## Start from option quotes
 
