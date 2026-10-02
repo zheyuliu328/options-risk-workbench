@@ -13,15 +13,15 @@ python3 -m venv .venv
 
 Choose a new directory. Existing output is refused. Each task saves a self-contained HTML report, exact request/result, input SHA-256, reference engine version, investigation thresholds, unit-level comparisons and scenario results.
 
-[Standard synthetic investigation](independent-reference/standard/report.html) · [Synthetic approximation-failure investigation](independent-reference/counterexample/report.html)
+[Standard synthetic investigation](independent-reference/standard/report.html) · [Synthetic approximation-failure investigation](independent-reference/counterexample/report.html). These frozen earlier reports retain their original price/Delta/Gamma scope; the full-Greek boundary report below records the current validator.
 
 ## Matched conventions and independent references
 
 European options use QuantLib AnalyticEuropeanEngine; American options use FdBlackScholesVanillaEngine at 800 and 1600 time/space steps with two damping steps. Dates are fixed, ACT/365 and continuous flat interest/dividend yields match the workbench. The global QuantLib evaluation date is restored. At scenario expiry the reference uses payoff; beyond expiry the production request validation rejects the task.
 
-Price, Delta and Gamma are compared per unit, before signed quantity and multiplier scaling. American CRR diagnostics retain 150/151/300/301/600/601 steps to expose odd/even oscillations. Thresholds are investigation rules, not universally validated error bounds. Reference mesh disagreement beyond 25% of the comparison threshold is flagged as reference_mesh_unstable, retaining the numbers rather than reporting unqualified agreement. The revision-2 policy added mesh classification after independent review; all diagnostics are retrospective and are not blind tests.
+Price and all five reported Greeks are compared per unit, before signed quantity and multiplier scaling. American CRR diagnostics retain 150/151/300/301/600/601 steps to expose odd/even oscillations. Thresholds are investigation rules, not universally validated error bounds. Reference mesh disagreement beyond 25% of the comparison threshold is flagged as reference_mesh_unstable, retaining the numbers rather than reporting unqualified agreement. The revision-2 policy added mesh classification after independent review; all diagnostics are retrospective and are not blind tests.
 
-Each scenario is rebuilt from the original request for independent full revaluation. The local approximation and its residual remain explicitly labeled as workbench calculations. This version does not independently compare Vega, Rho or Theta. Workbench Theta is a one-calendar-day maturity difference; it must not be equated to an instantaneous QuantLib Theta. No interest-rate shock is added.
+Each scenario is rebuilt from the original request for independent full revaluation. The local approximation and its residual remain explicitly labeled as workbench calculations. Vega, Rho and Theta now have convention-matched independent comparisons described below. Workbench Theta is a one-calendar-day maturity difference; it must not be equated to an instantaneous QuantLib Theta. No interest-rate shock is added.
 
 ## Source-backed local tasks
 
