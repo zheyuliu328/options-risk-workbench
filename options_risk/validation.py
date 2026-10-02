@@ -161,6 +161,11 @@ def attach_context(investigation, context):
 def render(investigation):
     def esc(value):
         return html.escape(format(value, '.8g') if isinstance(value, float) else str(value))
+    request = investigation['request']
+    portfolio_rows = ''.join('<tr>' + ''.join('<td>' + esc(p[k]) + '</td>' for k in
+        ['id', 'kind', 'style', 'strike', 'expiry', 'quantity', 'multiplier', 'volatility'])
+        + '</tr>' for p in request['positions'])
+    portfolio = '<h2>Fixed portfolio and valuation inputs</h2><p>' + esc(request['underlying']) + ' | ' + esc(request['currency']) + ' | Valuation date: ' + esc(request['as_of']) + '<br>Spot: ' + esc(request['spot']) + ' | Annual continuous rate: ' + esc(request.get('rate', 0)) + ' | Continuous dividend yield: ' + esc(request.get('dividend_yield', 0)) + '<br>Current model portfolio value: ' + esc(investigation['workbench']['market_value']) + '</p><div class="scroll"><table><tr><th>ID</th><th>Type</th><th>Style</th><th>Strike</th><th>Expiry</th><th>Quantity</th><th>Multiplier</th><th>Annual vol (ratio)</th></tr>' + portfolio_rows + '</table></div>'
     rows = ''.join('<tr>' + ''.join('<td>' + esc(row[k]) + '</td>' for k in
         ['name', 'workbench_pnl', 'reference_pnl', 'engine_pnl_difference',
          'workbench_local_approximation', 'workbench_approximation_residual']) + '</tr>'
@@ -191,7 +196,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}h1{font-size:28px
 <p>Fixed contracts, conditional model comparisons and local-approximation risk.
 This report is not market-price certification, trading performance or VaR.</p>
 <p>QuantLib version: ''' + esc(investigation['quantlib_version']) + '''. Unit-level checks requiring investigation: ''' + esc(investigation['attention_count']) + '''.</p>
-<h2>Scenario P&amp;L and approximation residual</h2><div class="scroll"><table><tr>
+''' + portfolio + '''<h2>Scenario P&amp;L and approximation residual</h2><div class="scroll"><table><tr>
 <th>Scenario</th><th>Workbench P&amp;L</th><th>Reference P&amp;L</th>
 <th>Engine difference</th><th>Local approximation</th><th>Approximation residual</th></tr>''' + rows + '''</table></div>
 ''' + source_section + '''<h2>Independent unit-level checks</h2><p>Price, Delta and Gamma are compared before quantity and multiplier scaling. Thresholds flag investigation, not acceptance.</p><div class="scroll"><table><tr><th>Position</th><th>Metric</th><th>Workbench</th><th>Reference</th><th>Difference</th><th>Threshold</th><th>Status</th></tr>''' + unit_rows + '''</table></div><h2>CRR step sensitivity</h2><p>Odd/even sequences may oscillate. More steps do not guarantee monotonic improvement.</p><div class="scroll"><table><tr><th>Position</th><th>Steps</th><th>Unit price</th><th>Delta</th><th>Gamma</th></tr>''' + tree_rows + '''</table></div><h2>Interpretation and limits</h2><ul>''' + ''.join('<li>' + esc(x) + '</li>' for x in investigation['limits']) + '''</ul>

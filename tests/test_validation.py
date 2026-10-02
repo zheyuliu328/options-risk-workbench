@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from options_risk.validation import attach_context, investigate, main, reference
+from options_risk.validation import attach_context, investigate, main, reference, render
 
 
 def fixture():
@@ -63,6 +63,15 @@ class IndependentReferenceTests(unittest.TestCase):
             d = investigate(fixture())
         self.assertEqual(d['positions'][0]['unit_checks'][0]['status'], 'reference_mesh_unstable')
         self.assertGreater(d['attention_count'], 0)
+
+    def test_offline_report_contains_inputs_and_escapes_identifiers(self):
+        r = fixture()
+        r['positions'][0]['id'] = '<script>alert(1)</script>'
+        text = render(investigate(r))
+        self.assertIn('Valuation date: 2026-09-29', text)
+        self.assertIn('Multiplier', text)
+        self.assertNotIn('<script>', text)
+        self.assertIn('&lt;script&gt;', text)
 
 
 class QuoteContextTests(unittest.TestCase):
