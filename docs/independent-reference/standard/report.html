@@ -1,0 +1,531 @@
+<!doctype html><html lang="en"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Independent option revaluation investigation</title>
+<style>body{font:16px/1.6 system-ui;color:#23313d;background:#f4f6f8;margin:0}
+main{max-width:1100px;margin:32px auto;padding:28px;background:white}
+.scroll{overflow:auto}table{border-collapse:collapse;width:100%}td,th{padding:10px;text-align:left;border-bottom:1px solid #dde3e8}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}h1{font-size:28px}</style><main>
+<h1>Independent option revaluation investigation</h1>
+<p>Fixed contracts, conditional model comparisons and local-approximation risk.
+This report is not market-price certification, trading performance or VaR.</p>
+<p>QuantLib version: 1.43. Unit-level checks requiring investigation: 0.</p>
+<h2>Scenario P&amp;L and approximation residual</h2><div class="scroll"><table><tr>
+<th>Scenario</th><th>Workbench P&amp;L</th><th>Reference P&amp;L</th>
+<th>Engine difference</th><th>Local approximation</th><th>Approximation residual</th></tr><tr><td>Unchanged</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>Down 5%, volatility +5 points</td><td>197.80632</td><td>197.16952</td><td>0.636802</td><td>221.88813</td><td>-24.08181</td></tr><tr><td>Up 5%, volatility unchanged</td><td>144.60511</td><td>144.56651</td><td>0.038599557</td><td>152.33955</td><td>-7.7344405</td></tr><tr><td>Seven calendar days pass</td><td>-71.0562</td><td>-71.106521</td><td>0.050320991</td><td>-67.188142</td><td>-3.8680584</td></tr></table></div>
+<h2>Independent unit-level checks</h2><p>Price, Delta and Gamma are compared before quantity and multiplier scaling. Thresholds flag investigation, not acceptance.</p><div class="scroll"><table><tr><th>Position</th><th>Metric</th><th>Workbench</th><th>Reference</th><th>Difference</th><th>Threshold</th><th>Status</th></tr><tr><td>long-call</td><td>price</td><td>2.9344527</td><td>2.9368356</td><td>-0.0023829</td><td>0.01</td><td>within_threshold</td></tr><tr><td>long-call</td><td>delta</td><td>0.52298492</td><td>0.52300418</td><td>-1.9257407e-05</td><td>0.0052300418</td><td>within_threshold</td></tr><tr><td>long-call</td><td>gamma</td><td>0.055659517</td><td>0.05552009</td><td>0.00013942759</td><td>0.0027760045</td><td>within_threshold</td></tr><tr><td>long-put</td><td>price</td><td>2.7807307</td><td>2.7826792</td><td>-0.0019485024</td><td>0.01</td><td>within_threshold</td></tr><tr><td>long-put</td><td>delta</td><td>-0.47856491</td><td>-0.47850751</td><td>-5.7400599e-05</td><td>0.005</td><td>within_threshold</td></tr><tr><td>long-put</td><td>gamma</td><td>0.056122761</td><td>0.055985389</td><td>0.00013737124</td><td>0.0027992695</td><td>within_threshold</td></tr></table></div><h2>CRR step sensitivity</h2><p>Odd/even sequences may oscillate. More steps do not guarantee monotonic improvement.</p><div class="scroll"><table><tr><th>Position</th><th>Steps</th><th>Unit price</th><th>Delta</th><th>Gamma</th></tr><tr><td>long-call</td><td>150</td><td>2.9320767</td><td>0.52296688</td><td>0.055800087</td></tr><tr><td>long-call</td><td>151</td><td>2.941552</td><td>0.52298402</td><td>0.055612396</td></tr><tr><td>long-call</td><td>300</td><td>2.9344527</td><td>0.52298492</td><td>0.055659517</td></tr><tr><td>long-call</td><td>301</td><td>2.9391982</td><td>0.52299348</td><td>0.055566294</td></tr><tr><td>long-call</td><td>600</td><td>2.9356414</td><td>0.52299394</td><td>0.055589599</td></tr><tr><td>long-call</td><td>601</td><td>2.9380162</td><td>0.52299822</td><td>0.055543143</td></tr><tr><td>long-put</td><td>150</td><td>2.7787588</td><td>-0.4786221</td><td>0.056261347</td></tr><tr><td>long-put</td><td>151</td><td>2.7877411</td><td>-0.4785512</td><td>0.056073512</td></tr><tr><td>long-put</td><td>300</td><td>2.7807307</td><td>-0.47856491</td><td>0.056122761</td></tr><tr><td>long-put</td><td>301</td><td>2.7852302</td><td>-0.47852963</td><td>0.056029459</td></tr><tr><td>long-put</td><td>600</td><td>2.7817171</td><td>-0.4785369</td><td>0.056053853</td></tr><tr><td>long-put</td><td>601</td><td>2.7839691</td><td>-0.4785193</td><td>0.056007353</td></tr></table></div><h2>Interpretation and limits</h2><ul><li>Independent engines agree only conditional on shared input conventions.</li><li>American FDM refinement and CRR oscillation are diagnostics, not exact error bounds.</li><li>Only price, delta and gamma have independent Greek comparisons here.</li><li>Workbench theta is a one-calendar-day change, not QuantLib instantaneous theta.</li><li>No market quotation, source authenticity, profit or model approval is certified.</li><li>Expiry Greeks are nonsmooth and are not compared as differentiable values.</li></ul>
+<details><summary>Frozen inputs, methods and complete diagnostics</summary><p>Includes 800/1600 FDM refinement. Numerical agreement does not establish source quality.</p><pre>{
+  &quot;policy&quot;: {
+    &quot;meaning&quot;: &quot;Predeclared investigation thresholds, not model approval bounds&quot;,
+    &quot;european&quot;: {
+      &quot;price_abs&quot;: 1e-08,
+      &quot;price_rel&quot;: 1e-10,
+      &quot;delta_abs&quot;: 1e-08,
+      &quot;gamma_abs&quot;: 1e-09
+    },
+    &quot;american&quot;: {
+      &quot;price_abs&quot;: 0.01,
+      &quot;price_rel&quot;: 0.001,
+      &quot;delta_abs&quot;: 0.005,
+      &quot;delta_rel&quot;: 0.01,
+      &quot;gamma_abs&quot;: 0.0005,
+      &quot;gamma_rel&quot;: 0.05
+    },
+    &quot;tree_steps&quot;: [
+      150,
+      151,
+      300,
+      301,
+      600,
+      601
+    ],
+    &quot;fd_meshes&quot;: [
+      800,
+      1600
+    ],
+    &quot;reference_refinement_fraction&quot;: 0.25,
+    &quot;revision&quot;: &quot;2: independent review added reference mesh classification; retrospective diagnostics&quot;
+  },
+  &quot;quantlib_version&quot;: &quot;1.43&quot;,
+  &quot;request&quot;: {
+    &quot;as_of&quot;: &quot;2026-09-29&quot;,
+    &quot;underlying&quot;: &quot;SYNTHETIC_ETF&quot;,
+    &quot;currency&quot;: &quot;USD&quot;,
+    &quot;spot&quot;: 100,
+    &quot;rate&quot;: 0.03,
+    &quot;dividend_yield&quot;: 0.01,
+    &quot;positions&quot;: [
+      {
+        &quot;id&quot;: &quot;long-call&quot;,
+        &quot;expiry&quot;: &quot;2026-10-29&quot;,
+        &quot;strike&quot;: 100,
+        &quot;quantity&quot;: 1,
+        &quot;multiplier&quot;: 100,
+        &quot;volatility&quot;: 0.25,
+        &quot;kind&quot;: &quot;call&quot;,
+        &quot;style&quot;: &quot;american&quot;
+      },
+      {
+        &quot;id&quot;: &quot;long-put&quot;,
+        &quot;expiry&quot;: &quot;2026-10-29&quot;,
+        &quot;strike&quot;: 100,
+        &quot;quantity&quot;: 1,
+        &quot;multiplier&quot;: 100,
+        &quot;volatility&quot;: 0.25,
+        &quot;kind&quot;: &quot;put&quot;,
+        &quot;style&quot;: &quot;american&quot;
+      }
+    ],
+    &quot;scenarios&quot;: [
+      {
+        &quot;name&quot;: &quot;Unchanged&quot;,
+        &quot;spot_return&quot;: 0,
+        &quot;vol_change&quot;: 0,
+        &quot;days&quot;: 0
+      },
+      {
+        &quot;name&quot;: &quot;Down 5%, volatility +5 points&quot;,
+        &quot;spot_return&quot;: -0.05,
+        &quot;vol_change&quot;: 0.05,
+        &quot;days&quot;: 1
+      },
+      {
+        &quot;name&quot;: &quot;Up 5%, volatility unchanged&quot;,
+        &quot;spot_return&quot;: 0.05,
+        &quot;vol_change&quot;: 0,
+        &quot;days&quot;: 1
+      },
+      {
+        &quot;name&quot;: &quot;Seven calendar days pass&quot;,
+        &quot;spot_return&quot;: 0,
+        &quot;vol_change&quot;: 0,
+        &quot;days&quot;: 7
+      }
+    ]
+  },
+  &quot;workbench&quot;: {
+    &quot;schema_version&quot;: 1,
+    &quot;underlying&quot;: &quot;SYNTHETIC_ETF&quot;,
+    &quot;currency&quot;: &quot;USD&quot;,
+    &quot;as_of&quot;: &quot;2026-09-29&quot;,
+    &quot;spot&quot;: 100.0,
+    &quot;rate&quot;: 0.03,
+    &quot;dividend_yield&quot;: 0.01,
+    &quot;market_value&quot;: 571.5183358307197,
+    &quot;greeks&quot;: {
+      &quot;delta&quot;: 4.442000887076212,
+      &quot;gamma&quot;: 11.178227776745723,
+      &quot;vega_per_vol_point&quot;: 22.793719110368205,
+      &quot;rho_per_rate_point&quot;: 0.5079416645270562,
+      &quot;theta_per_day&quot;: -9.598305972225416
+    },
+    &quot;positions&quot;: [
+      {
+        &quot;id&quot;: &quot;long-call&quot;,
+        &quot;expiry&quot;: &quot;2026-10-29&quot;,
+        &quot;strike&quot;: 100.0,
+        &quot;quantity&quot;: 1.0,
+        &quot;multiplier&quot;: 100.0,
+        &quot;unit_value&quot;: 2.9344526942326983,
+        &quot;market_value&quot;: 293.44526942326985,
+        &quot;greeks&quot;: {
+          &quot;delta&quot;: 52.29849203058908,
+          &quot;gamma&quot;: 5.5659517201398225,
+          &quot;vega_per_vol_point&quot;: 11.39870047411562,
+          &quot;rho_per_rate_point&quot;: 4.0573065242544,
+          &quot;theta_per_day&quot;: -5.052466369698471
+        }
+      },
+      {
+        &quot;id&quot;: &quot;long-put&quot;,
+        &quot;expiry&quot;: &quot;2026-10-29&quot;,
+        &quot;strike&quot;: 100.0,
+        &quot;quantity&quot;: 1.0,
+        &quot;multiplier&quot;: 100.0,
+        &quot;unit_value&quot;: 2.780730664074499,
+        &quot;market_value&quot;: 278.0730664074499,
+        &quot;greeks&quot;: {
+          &quot;delta&quot;: -47.85649114351287,
+          &quot;gamma&quot;: 5.612276056605901,
+          &quot;vega_per_vol_point&quot;: 11.395018636252585,
+          &quot;rho_per_rate_point&quot;: -3.549364859727344,
+          &quot;theta_per_day&quot;: -4.545839602526946
+        }
+      }
+    ],
+    &quot;scenarios&quot;: [
+      {
+        &quot;name&quot;: &quot;Unchanged&quot;,
+        &quot;date&quot;: &quot;2026-09-29&quot;,
+        &quot;spot_return&quot;: 0.0,
+        &quot;vol_change&quot;: 0.0,
+        &quot;pnl&quot;: 0.0,
+        &quot;positions&quot;: [
+          {
+            &quot;id&quot;: &quot;long-call&quot;,
+            &quot;strike&quot;: 100.0,
+            &quot;expiry&quot;: &quot;2026-10-29&quot;,
+            &quot;market_value&quot;: 293.44526942326985,
+            &quot;pnl&quot;: 0.0,
+            &quot;greek_approximation&quot;: 0.0,
+            &quot;approximation_residual&quot;: 0.0
+          },
+          {
+            &quot;id&quot;: &quot;long-put&quot;,
+            &quot;strike&quot;: 100.0,
+            &quot;expiry&quot;: &quot;2026-10-29&quot;,
+            &quot;market_value&quot;: 278.0730664074499,
+            &quot;pnl&quot;: 0.0,
+            &quot;greek_approximation&quot;: 0.0,
+            &quot;approximation_residual&quot;: 0.0
+          }
+        ]
+      },
+      {
+        &quot;name&quot;: &quot;Down 5%, volatility +5 points&quot;,
+        &quot;date&quot;: &quot;2026-09-30&quot;,
+        &quot;spot_return&quot;: -0.05,
+        &quot;vol_change&quot;: 0.05,
+        &quot;pnl&quot;: 197.80632224110704,
+        &quot;positions&quot;: [
+          {
+            &quot;id&quot;: &quot;long-call&quot;,
+            &quot;strike&quot;: 100.0,
+            &quot;expiry&quot;: &quot;2026-10-29&quot;,
+            &quot;market_value&quot;: 141.59326898699683,
+            &quot;pnl&quot;: -151.85200043627302,
+            &quot;greek_approximation&quot;: -139.97702765031798,
+            &quot;approximation_residual&quot;: -11.874972785955038
+          },
+          {
+            &quot;id&quot;: &quot;long-put&quot;,
+            &quot;strike&quot;: 100.0,
+            &quot;expiry&quot;: &quot;2026-10-29&quot;,
+            &quot;market_value&quot;: 627.73138908483,
+            &quot;pnl&quot;: 349.65832267738006,
+            &quot;greek_approximation&quot;: 361.8651600038741,
+            &quot;approximation_residual&quot;: -12.206837326494053
+          }
+        ]
+      },
+      {
+        &quot;name&quot;: &quot;Up 5%, volatility unchanged&quot;,
+        &quot;date&quot;: &quot;2026-09-30&quot;,
+        &quot;spot_return&quot;: 0.05,
+        &quot;vol_change&quot;: 0.0,
+        &quot;pnl&quot;: 144.60510519226705,
+        &quot;positions&quot;: [
+          {
+            &quot;id&quot;: &quot;long-call&quot;,
+            &quot;strike&quot;: 100.0,
+            &quot;expiry&quot;: &quot;2026-10-29&quot;,
+            &quot;market_value&quot;: 615.6540433648807,
+            &quot;pnl&quot;: 322.2087739416109,
+            &quot;greek_approximation&quot;: 326.0143902849947,
+            &quot;approximation_residual&quot;: -3.8056163433838037
+          },
+          {
+            &quot;id&quot;: &quot;long-put&quot;,
+            &quot;strike&quot;: 100.0,
+            &quot;expiry&quot;: &quot;2026-10-29&quot;,
+            &quot;market_value&quot;: 100.46939765810608,
+            &quot;pnl&quot;: -177.60366874934385,
+            &quot;greek_approximation&quot;: -173.67484461251752,
+            &quot;approximation_residual&quot;: -3.9288241368263357
+          }
+        ]
+      },
+      {
+        &quot;name&quot;: &quot;Seven calendar days pass&quot;,
+        &quot;date&quot;: &quot;2026-10-06&quot;,
+        &quot;spot_return&quot;: 0.0,
+        &quot;vol_change&quot;: 0.0,
+        &quot;pnl&quot;: -71.05620022020099,
+        &quot;positions&quot;: [
+          {
+            &quot;id&quot;: &quot;long-call&quot;,
+            &quot;strike&quot;: 100.0,
+            &quot;expiry&quot;: &quot;2026-10-29&quot;,
+            &quot;market_value&quot;: 256.1407422772106,
+            &quot;pnl&quot;: -37.30452714605923,
+            &quot;greek_approximation&quot;: -35.367264587889295,
+            &quot;approximation_residual&quot;: -1.9372625581699339
+          },
+          {
+            &quot;id&quot;: &quot;long-put&quot;,
+            &quot;strike&quot;: 100.0,
+            &quot;expiry&quot;: &quot;2026-10-29&quot;,
+            &quot;market_value&quot;: 244.32139333330815,
+            &quot;pnl&quot;: -33.75167307414176,
+            &quot;greek_approximation&quot;: -31.82087721768862,
+            &quot;approximation_residual&quot;: -1.9307958564531447
+          }
+        ]
+      }
+    ],
+    &quot;assumptions&quot;: [
+      &quot;Single underlying and currency; signed quantities and explicit multipliers.&quot;,
+      &quot;European BSM or American CRR, 300 steps; continuous dividend yield.&quot;,
+      &quot;Flat per-position volatility; no smile recalibration or historical executable quotes.&quot;,
+      &quot;ACT/365 calendar days; rates/dividends unchanged under shocks.&quot;,
+      &quot;Model-value changes exclude fees, financing, realised exercise and assignment cash flows.&quot;,
+      &quot;Greeks are local sensitivities: analytic European delta/gamma/vega at positive time/volatility; other finite differences and tree Greeks retain numerical error.&quot;,
+      &quot;Scenarios are hypothetical, not a backtest, prediction or trading recommendation.&quot;
+    ]
+  },
+  &quot;positions&quot;: [
+    {
+      &quot;id&quot;: &quot;long-call&quot;,
+      &quot;unit_checks&quot;: [
+        {
+          &quot;metric&quot;: &quot;price&quot;,
+          &quot;own&quot;: 2.9344526942326983,
+          &quot;reference&quot;: 2.936835594208782,
+          &quot;difference&quot;: -0.0023828999760837632,
+          &quot;threshold&quot;: 0.01,
+          &quot;reference_mesh_difference&quot;: -1.4785387685289919e-05,
+          &quot;reference_mesh_threshold&quot;: 0.0025,
+          &quot;own_threshold_exceeded&quot;: false,
+          &quot;status&quot;: &quot;within_threshold&quot;
+        },
+        {
+          &quot;metric&quot;: &quot;delta&quot;,
+          &quot;own&quot;: 0.5229849203058908,
+          &quot;reference&quot;: 0.5230041777133636,
+          &quot;difference&quot;: -1.9257407472772492e-05,
+          &quot;threshold&quot;: 0.0052300417771336365,
+          &quot;reference_mesh_difference&quot;: -3.6245380539146055e-06,
+          &quot;reference_mesh_threshold&quot;: 0.0013075104442834091,
+          &quot;own_threshold_exceeded&quot;: false,
+          &quot;status&quot;: &quot;within_threshold&quot;
+        },
+        {
+          &quot;metric&quot;: &quot;gamma&quot;,
+          &quot;own&quot;: 0.05565951720139822,
+          &quot;reference&quot;: 0.05552008960789253,
+          &quot;difference&quot;: 0.0001394275935056935,
+          &quot;threshold&quot;: 0.0027760044803946267,
+          &quot;reference_mesh_difference&quot;: -5.322067810481501e-07,
+          &quot;reference_mesh_threshold&quot;: 0.0006940011200986567,
+          &quot;own_threshold_exceeded&quot;: false,
+          &quot;status&quot;: &quot;within_threshold&quot;
+        }
+      ],
+      &quot;reference_800&quot;: {
+        &quot;price&quot;: 2.9368503795964673,
+        &quot;delta&quot;: 0.5230078022514175,
+        &quot;gamma&quot;: 0.05552062181467358
+      },
+      &quot;reference_1600&quot;: {
+        &quot;price&quot;: 2.936835594208782,
+        &quot;delta&quot;: 0.5230041777133636,
+        &quot;gamma&quot;: 0.05552008960789253
+      },
+      &quot;fd_price_refinement&quot;: -1.4785387685289919e-05,
+      &quot;tree_diagnostics&quot;: [
+        {
+          &quot;steps&quot;: 150,
+          &quot;price&quot;: 2.9320767201216387,
+          &quot;delta&quot;: 0.5229668845207729,
+          &quot;gamma&quot;: 0.0558000867832187,
+          &quot;vega_per_vol_point&quot;: 0.11389205643715705,
+          &quot;rho_per_rate_point&quot;: 0.04057341794423408,
+          &quot;theta_per_day&quot;: -0.05048485277628956
+        },
+        {
+          &quot;steps&quot;: 151,
+          &quot;price&quot;: 2.941551974057284,
+          &quot;delta&quot;: 0.5229840216407619,
+          &quot;gamma&quot;: 0.05561239584854384,
+          &quot;vega_per_vol_point&quot;: 0.11427077909841765,
+          &quot;rho_per_rate_point&quot;: 0.04056704014694379,
+          &quot;theta_per_day&quot;: -0.050643321002007635
+        },
+        {
+          &quot;steps&quot;: 300,
+          &quot;price&quot;: 2.9344526942326983,
+          &quot;delta&quot;: 0.5229849203058908,
+          &quot;gamma&quot;: 0.05565951720139822,
+          &quot;vega_per_vol_point&quot;: 0.1139870047411562,
+          &quot;rho_per_rate_point&quot;: 0.040573065242544004,
+          &quot;theta_per_day&quot;: -0.05052466369698471
+        },
+        {
+          &quot;steps&quot;: 301,
+          &quot;price&quot;: 2.9391982052641414,
+          &quot;delta&quot;: 0.5229934827302052,
+          &quot;gamma&quot;: 0.055566294185473764,
+          &quot;vega_per_vol_point&quot;: 0.11417668122507774,
+          &quot;rho_per_rate_point&quot;: 0.040569868968787226,
+          &quot;theta_per_day&quot;: -0.05060402954334586
+        },
+        {
+          &quot;steps&quot;: 600,
+          &quot;price&quot;: 2.9356414355352496,
+          &quot;delta&quot;: 0.5229939443345396,
+          &quot;gamma&quot;: 0.055589598922267947,
+          &quot;vega_per_vol_point&quot;: 0.11403450903348045,
+          &quot;rho_per_rate_point&quot;: 0.0405728887629353,
+          &quot;theta_per_day&quot;: -0.05054458179525145
+        },
+        {
+          &quot;steps&quot;: 601,
+          &quot;price&quot;: 2.9380161663756326,
+          &quot;delta&quot;: 0.522998223987314,
+          &quot;gamma&quot;: 0.05554314250077673,
+          &quot;vega_per_vol_point&quot;: 0.11412942623620914,
+          &quot;rho_per_rate_point&quot;: 0.04057128878023342,
+          &quot;theta_per_day&quot;: -0.050584297723823564
+        }
+      ]
+    },
+    {
+      &quot;id&quot;: &quot;long-put&quot;,
+      &quot;unit_checks&quot;: [
+        {
+          &quot;metric&quot;: &quot;price&quot;,
+          &quot;own&quot;: 2.780730664074499,
+          &quot;reference&quot;: 2.7826791664419943,
+          &quot;difference&quot;: -0.0019485023674952195,
+          &quot;threshold&quot;: 0.01,
+          &quot;reference_mesh_difference&quot;: 2.9414787589221447e-05,
+          &quot;reference_mesh_threshold&quot;: 0.0025,
+          &quot;own_threshold_exceeded&quot;: false,
+          &quot;status&quot;: &quot;within_threshold&quot;
+        },
+        {
+          &quot;metric&quot;: &quot;delta&quot;,
+          &quot;own&quot;: -0.4785649114351287,
+          &quot;reference&quot;: -0.478507510836575,
+          &quot;difference&quot;: -5.740059855369184e-05,
+          &quot;threshold&quot;: 0.005,
+          &quot;reference_mesh_difference&quot;: -1.899495267632112e-06,
+          &quot;reference_mesh_threshold&quot;: 0.00125,
+          &quot;own_threshold_exceeded&quot;: false,
+          &quot;status&quot;: &quot;within_threshold&quot;
+        },
+        {
+          &quot;metric&quot;: &quot;gamma&quot;,
+          &quot;own&quot;: 0.056122760566059006,
+          &quot;reference&quot;: 0.05598538932995723,
+          &quot;difference&quot;: 0.00013737123610177426,
+          &quot;threshold&quot;: 0.0027992694664978617,
+          &quot;reference_mesh_difference&quot;: -3.0697573116106325e-07,
+          &quot;reference_mesh_threshold&quot;: 0.0006998173666244654,
+          &quot;own_threshold_exceeded&quot;: false,
+          &quot;status&quot;: &quot;within_threshold&quot;
+        }
+      ],
+      &quot;reference_800&quot;: {
+        &quot;price&quot;: 2.782649751654405,
+        &quot;delta&quot;: -0.47850561134130737,
+        &quot;gamma&quot;: 0.05598569630568839
+      },
+      &quot;reference_1600&quot;: {
+        &quot;price&quot;: 2.7826791664419943,
+        &quot;delta&quot;: -0.478507510836575,
+        &quot;gamma&quot;: 0.05598538932995723
+      },
+      &quot;fd_price_refinement&quot;: 2.9414787589221447e-05,
+      &quot;tree_diagnostics&quot;: [
+        {
+          &quot;steps&quot;: 150,
+          &quot;price&quot;: 2.778758849756707,
+          &quot;delta&quot;: -0.47862210441536807,
+          &quot;gamma&quot;: 0.05626134727257921,
+          &quot;vega_per_vol_point&quot;: 0.11386266420267077,
+          &quot;rho_per_rate_point&quot;: -0.035383996273541385,
+          &quot;theta_per_day&quot;: -0.04542953555526629
+        },
+        {
+          &quot;steps&quot;: 151,
+          &quot;price&quot;: 2.7877410870257187,
+          &quot;delta&quot;: -0.4785512028610673,
+          &quot;gamma&quot;: 0.05607351169937546,
+          &quot;vega_per_vol_point&quot;: 0.11423915813239871,
+          &quot;rho_per_rate_point&quot;: -0.03561312233235636,
+          &quot;theta_per_day&quot;: -0.04557193975374707
+        },
+        {
+          &quot;steps&quot;: 300,
+          &quot;price&quot;: 2.780730664074499,
+          &quot;delta&quot;: -0.4785649114351287,
+          &quot;gamma&quot;: 0.056122760566059006,
+          &quot;vega_per_vol_point&quot;: 0.11395018636252585,
+          &quot;rho_per_rate_point&quot;: -0.03549364859727344,
+          &quot;theta_per_day&quot;: -0.04545839602526946
+        },
+        {
+          &quot;steps&quot;: 301,
+          &quot;price&quot;: 2.785230238106294,
+          &quot;delta&quot;: -0.4785296331997846,
+          &quot;gamma&quot;: 0.05602945855038879,
+          &quot;vega_per_vol_point&quot;: 0.11413870816867178,
+          &quot;rho_per_rate_point&quot;: -0.035608710057122295,
+          &quot;theta_per_day&quot;: -0.04552964697006123
+        },
+        {
+          &quot;steps&quot;: 600,
+          &quot;price&quot;: 2.781717129150318,
+          &quot;delta&quot;: -0.4785368980907205,
+          &quot;gamma&quot;: 0.05605385320602661,
+          &quot;vega_per_vol_point&quot;: 0.11399512185775507,
+          &quot;rho_per_rate_point&quot;: -0.03556462806804106,
+          &quot;theta_per_day&quot;: -0.04547247175080881
+        },
+        {
+          &quot;steps&quot;: 601,
+          &quot;price&quot;: 2.783969062137887,
+          &quot;delta&quot;: -0.4785192954017653,
+          &quot;gamma&quot;: 0.05600735336495624,
+          &quot;vega_per_vol_point&quot;: 0.11408954428120843,
+          &quot;rho_per_rate_point&quot;: -0.03562243971073631,
+          &quot;theta_per_day&quot;: -0.04550814423815108
+        }
+      ]
+    }
+  ],
+  &quot;scenario_reference&quot;: [
+    {
+      &quot;name&quot;: &quot;Unchanged&quot;,
+      &quot;workbench_pnl&quot;: 0.0,
+      &quot;reference_pnl&quot;: 0.0,
+      &quot;engine_pnl_difference&quot;: 0.0,
+      &quot;workbench_local_approximation&quot;: 0.0,
+      &quot;workbench_approximation_residual&quot;: 0.0
+    },
+    {
+      &quot;name&quot;: &quot;Down 5%, volatility +5 points&quot;,
+      &quot;workbench_pnl&quot;: 197.80632224110704,
+      &quot;reference_pnl&quot;: 197.16952024451223,
+      &quot;engine_pnl_difference&quot;: 0.6368019965948122,
+      &quot;workbench_local_approximation&quot;: 221.88813235355613,
+      &quot;workbench_approximation_residual&quot;: -24.08181011244909
+    },
+    {
+      &quot;name&quot;: &quot;Up 5%, volatility unchanged&quot;,
+      &quot;workbench_pnl&quot;: 144.60510519226705,
+      &quot;reference_pnl&quot;: 144.5665056352035,
+      &quot;engine_pnl_difference&quot;: 0.03859955706354867,
+      &quot;workbench_local_approximation&quot;: 152.3395456724772,
+      &quot;workbench_approximation_residual&quot;: -7.734440480210139
+    },
+    {
+      &quot;name&quot;: &quot;Seven calendar days pass&quot;,
+      &quot;workbench_pnl&quot;: -71.05620022020099,
+      &quot;reference_pnl&quot;: -71.10652121115902,
+      &quot;engine_pnl_difference&quot;: 0.05032099095802778,
+      &quot;workbench_local_approximation&quot;: -67.18814180557791,
+      &quot;workbench_approximation_residual&quot;: -3.8680584146230785
+    }
+  ],
+  &quot;limits&quot;: [
+    &quot;Independent engines agree only conditional on shared input conventions.&quot;,
+    &quot;American FDM refinement and CRR oscillation are diagnostics, not exact error bounds.&quot;,
+    &quot;Only price, delta and gamma have independent Greek comparisons here.&quot;,
+    &quot;Workbench theta is a one-calendar-day change, not QuantLib instantaneous theta.&quot;,
+    &quot;No market quotation, source authenticity, profit or model approval is certified.&quot;,
+    &quot;Expiry Greeks are nonsmooth and are not compared as differentiable values.&quot;
+  ],
+  &quot;attention_count&quot;: 0,
+  &quot;input_sha256&quot;: &quot;15cd1f526692345cd356e7f29d488b235e343291156956c4116a7fa85e934c85&quot;
+}</pre></details></main></html>

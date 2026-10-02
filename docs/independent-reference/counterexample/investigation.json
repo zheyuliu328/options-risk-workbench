@@ -1,0 +1,365 @@
+{
+  "policy": {
+    "meaning": "Predeclared investigation thresholds, not model approval bounds",
+    "european": {
+      "price_abs": 1e-08,
+      "price_rel": 1e-10,
+      "delta_abs": 1e-08,
+      "gamma_abs": 1e-09
+    },
+    "american": {
+      "price_abs": 0.01,
+      "price_rel": 0.001,
+      "delta_abs": 0.005,
+      "delta_rel": 0.01,
+      "gamma_abs": 0.0005,
+      "gamma_rel": 0.05
+    },
+    "tree_steps": [
+      150,
+      151,
+      300,
+      301,
+      600,
+      601
+    ],
+    "fd_meshes": [
+      800,
+      1600
+    ],
+    "reference_refinement_fraction": 0.25,
+    "revision": "2: independent review added reference mesh classification; retrospective diagnostics"
+  },
+  "quantlib_version": "1.43",
+  "request": {
+    "underlying": "SYNTHETIC_ETF",
+    "currency": "USD",
+    "as_of": "2026-09-29",
+    "spot": 99,
+    "rate": 0,
+    "dividend_yield": 0,
+    "positions": [
+      {
+        "id": "long-call",
+        "kind": "call",
+        "style": "european",
+        "strike": 100,
+        "expiry": "2026-10-29",
+        "quantity": 1,
+        "multiplier": 100,
+        "volatility": 0.01
+      },
+      {
+        "id": "long-put",
+        "kind": "put",
+        "style": "european",
+        "strike": 100,
+        "expiry": "2026-10-29",
+        "quantity": 1,
+        "multiplier": 100,
+        "volatility": 0.01
+      }
+    ],
+    "scenarios": [
+      {
+        "name": "Unchanged",
+        "spot_return": 0,
+        "vol_change": 0,
+        "days": 0
+      },
+      {
+        "name": "Small rise: 0.1%",
+        "spot_return": 0.001,
+        "vol_change": 0,
+        "days": 0
+      },
+      {
+        "name": "Large rise: 5%",
+        "spot_return": 0.05,
+        "vol_change": 0,
+        "days": 0
+      }
+    ]
+  },
+  "workbench": {
+    "schema_version": 1,
+    "underlying": "SYNTHETIC_ETF",
+    "currency": "USD",
+    "as_of": "2026-09-29",
+    "spot": 99.0,
+    "rate": 0.0,
+    "dividend_yield": 0.0,
+    "market_value": 100.00326241314767,
+    "greeks": {
+      "delta": -99.95420170019989,
+      "gamma": 0.6059691959048933,
+      "vega_per_vol_point": 0.04881455415668925,
+      "rho_per_rate_point": -8.215454095197844,
+      "theta_per_day": -0.0007400384668097143
+    },
+    "positions": [
+      {
+        "id": "long-call",
+        "expiry": "2026-10-29",
+        "strike": 100.0,
+        "quantity": 1.0,
+        "multiplier": 100.0,
+        "unit_value": 1.631206573763158e-05,
+        "market_value": 0.0016312065737631581,
+        "greeks": {
+          "delta": 0.02289914990005941,
+          "gamma": 0.30298459795244664,
+          "vega_per_vol_point": 0.024407277078344624,
+          "rho_per_rate_point": 0.0018619935343751337,
+          "theta_per_day": -0.0003700192330678004
+        }
+      },
+      {
+        "id": "long-put",
+        "expiry": "2026-10-29",
+        "strike": 100.0,
+        "quantity": 1.0,
+        "multiplier": 100.0,
+        "unit_value": 1.000016312065739,
+        "market_value": 100.0016312065739,
+        "greeks": {
+          "delta": -99.97710085009994,
+          "gamma": 0.30298459795244664,
+          "vega_per_vol_point": 0.024407277078344624,
+          "rho_per_rate_point": -8.217316088732218,
+          "theta_per_day": -0.0003700192337419139
+        }
+      }
+    ],
+    "scenarios": [
+      {
+        "name": "Unchanged",
+        "date": "2026-09-29",
+        "spot_return": 0.0,
+        "vol_change": 0.0,
+        "pnl": 0.0,
+        "positions": [
+          {
+            "id": "long-call",
+            "strike": 100.0,
+            "expiry": "2026-10-29",
+            "market_value": 0.0016312065737631581,
+            "pnl": 0.0,
+            "greek_approximation": 0.0,
+            "approximation_residual": 0.0
+          },
+          {
+            "id": "long-put",
+            "strike": 100.0,
+            "expiry": "2026-10-29",
+            "market_value": 100.0016312065739,
+            "pnl": 0.0,
+            "greek_approximation": 0.0,
+            "approximation_residual": 0.0
+          }
+        ]
+      },
+      {
+        "name": "Small rise: 0.1%",
+        "date": "2026-09-29",
+        "spot_return": 0.001,
+        "vol_change": 0.0,
+        "pnl": -9.890870347220261,
+        "positions": [
+          {
+            "id": "long-call",
+            "strike": 100.0,
+            "expiry": "2026-10-29",
+            "market_value": 0.006196032963214082,
+            "pnl": 0.004564826389450924,
+            "greek_approximation": 0.0037517918623718467,
+            "approximation_residual": 0.0008130345270790772
+          },
+          {
+            "id": "long-put",
+            "strike": 100.0,
+            "expiry": "2026-10-29",
+            "market_value": 90.10619603296419,
+            "pnl": -9.895435173609712,
+            "greek_approximation": -9.896248208137628,
+            "approximation_residual": 0.0008130345279155904
+          }
+        ]
+      },
+      {
+        "name": "Large rise: 5%",
+        "date": "2026-09-29",
+        "spot_return": 0.05,
+        "vol_change": 0.0,
+        "pnl": 294.9967375868526,
+        "positions": [
+          {
+            "id": "long-call",
+            "strike": 100.0,
+            "expiry": "2026-10-29",
+            "market_value": 395.0000000000003,
+            "pnl": 394.9983687934265,
+            "greek_approximation": 3.8252908476702068,
+            "approximation_residual": 391.1730779457563
+          },
+          {
+            "id": "long-put",
+            "strike": 100.0,
+            "expiry": "2026-10-29",
+            "market_value": 1.4074003380876709e-41,
+            "pnl": -100.0016312065739,
+            "greek_approximation": -491.17470915232985,
+            "approximation_residual": 391.17307794575595
+          }
+        ]
+      }
+    ],
+    "assumptions": [
+      "Single underlying and currency; signed quantities and explicit multipliers.",
+      "European BSM or American CRR, 300 steps; continuous dividend yield.",
+      "Flat per-position volatility; no smile recalibration or historical executable quotes.",
+      "ACT/365 calendar days; rates/dividends unchanged under shocks.",
+      "Model-value changes exclude fees, financing, realised exercise and assignment cash flows.",
+      "Greeks are local sensitivities: analytic European delta/gamma/vega at positive time/volatility; other finite differences and tree Greeks retain numerical error.",
+      "Scenarios are hypothetical, not a backtest, prediction or trading recommendation."
+    ]
+  },
+  "positions": [
+    {
+      "id": "long-call",
+      "unit_checks": [
+        {
+          "metric": "price",
+          "own": 1.631206573763158e-05,
+          "reference": 1.6312065737988934e-05,
+          "difference": -3.5735303605122226e-16,
+          "threshold": 1e-08,
+          "reference_mesh_difference": 0.0,
+          "reference_mesh_threshold": 2.5e-09,
+          "own_threshold_exceeded": false,
+          "status": "within_threshold"
+        },
+        {
+          "metric": "delta",
+          "own": 0.0002289914990005941,
+          "reference": 0.00022899149900067022,
+          "difference": -7.611099250848241e-17,
+          "threshold": 1e-08,
+          "reference_mesh_difference": 0.0,
+          "reference_mesh_threshold": 2.5e-09,
+          "own_threshold_exceeded": false,
+          "status": "within_threshold"
+        },
+        {
+          "metric": "gamma",
+          "own": 0.0030298459795244665,
+          "reference": 0.0030298459795259913,
+          "difference": -1.5248219353836134e-15,
+          "threshold": 1e-09,
+          "reference_mesh_difference": 0.0,
+          "reference_mesh_threshold": 2.5e-10,
+          "own_threshold_exceeded": false,
+          "status": "within_threshold"
+        }
+      ],
+      "reference_800": {
+        "price": 1.6312065737988934e-05,
+        "delta": 0.00022899149900067022,
+        "gamma": 0.0030298459795259913
+      },
+      "reference_1600": {
+        "price": 1.6312065737988934e-05,
+        "delta": 0.00022899149900067022,
+        "gamma": 0.0030298459795259913
+      },
+      "fd_price_refinement": 0.0,
+      "tree_diagnostics": []
+    },
+    {
+      "id": "long-put",
+      "unit_checks": [
+        {
+          "metric": "price",
+          "own": 1.000016312065739,
+          "reference": 1.0000163120657481,
+          "difference": -9.103828801926284e-15,
+          "threshold": 1e-08,
+          "reference_mesh_difference": 0.0,
+          "reference_mesh_threshold": 2.5e-09,
+          "own_threshold_exceeded": false,
+          "status": "within_threshold"
+        },
+        {
+          "metric": "delta",
+          "own": -0.9997710085009994,
+          "reference": -0.9997710085009993,
+          "difference": -1.1102230246251565e-16,
+          "threshold": 1e-08,
+          "reference_mesh_difference": 0.0,
+          "reference_mesh_threshold": 2.5e-09,
+          "own_threshold_exceeded": false,
+          "status": "within_threshold"
+        },
+        {
+          "metric": "gamma",
+          "own": 0.0030298459795244665,
+          "reference": 0.0030298459795259913,
+          "difference": -1.5248219353836134e-15,
+          "threshold": 1e-09,
+          "reference_mesh_difference": 0.0,
+          "reference_mesh_threshold": 2.5e-10,
+          "own_threshold_exceeded": false,
+          "status": "within_threshold"
+        }
+      ],
+      "reference_800": {
+        "price": 1.0000163120657481,
+        "delta": -0.9997710085009993,
+        "gamma": 0.0030298459795259913
+      },
+      "reference_1600": {
+        "price": 1.0000163120657481,
+        "delta": -0.9997710085009993,
+        "gamma": 0.0030298459795259913
+      },
+      "fd_price_refinement": 0.0,
+      "tree_diagnostics": []
+    }
+  ],
+  "scenario_reference": [
+    {
+      "name": "Unchanged",
+      "workbench_pnl": 0.0,
+      "reference_pnl": 0.0,
+      "engine_pnl_difference": 0.0,
+      "workbench_local_approximation": 0.0,
+      "workbench_approximation_residual": 0.0
+    },
+    {
+      "name": "Small rise: 0.1%",
+      "workbench_pnl": -9.890870347220261,
+      "reference_pnl": -9.890870347221309,
+      "engine_pnl_difference": 1.0480505352461478e-12,
+      "workbench_local_approximation": -9.892496416275256,
+      "workbench_approximation_residual": 0.0016260690549945167
+    },
+    {
+      "name": "Large rise: 5%",
+      "workbench_pnl": 294.9967375868526,
+      "reference_pnl": 294.9967375868519,
+      "engine_pnl_difference": 6.821210263296962e-13,
+      "workbench_local_approximation": -487.34941830465965,
+      "workbench_approximation_residual": 782.3461558915122
+    }
+  ],
+  "limits": [
+    "Independent engines agree only conditional on shared input conventions.",
+    "American FDM refinement and CRR oscillation are diagnostics, not exact error bounds.",
+    "Only price, delta and gamma have independent Greek comparisons here.",
+    "Workbench theta is a one-calendar-day change, not QuantLib instantaneous theta.",
+    "No market quotation, source authenticity, profit or model approval is certified.",
+    "Expiry Greeks are nonsmooth and are not compared as differentiable values."
+  ],
+  "attention_count": 0,
+  "input_sha256": "a1b318e479ebbf00a98652d8de866b36cb9a19afb9c5784a24d6401fc9f6f81f"
+}

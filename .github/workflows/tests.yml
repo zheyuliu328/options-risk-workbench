@@ -39,3 +39,19 @@ jobs:
         with:
           name: browser-flow-evidence
           path: outputs/browser-flow/
+
+  independent-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install '.[validation]'
+      - run: python -m unittest discover -s tests -v
+      - run: python -m options_risk.validation examples/portfolio.json --output /tmp/reference-standard
+      - run: python -m options_risk.validation examples/counterexample.json --output /tmp/reference-counterexample
+      - uses: actions/upload-artifact@v4
+        with:
+          name: independent-reference-evidence
+          path: /tmp/reference-*/
