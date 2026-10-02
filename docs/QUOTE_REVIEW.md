@@ -1,6 +1,6 @@
 # Quote-to-volatility review
 
-This optional native workflow starts from per-unit bid/ask option premiums, rather than requiring an externally supplied volatility. It uses the existing BSM European or fixed-step CRR American model, checks each endpoint independently, and exports complete inputs and readable diagnostics. It has no market-data downloader. This feature is not yet in the public browser application.
+This optional browser and native workflow starts from per-unit bid/ask option premiums, rather than requiring an externally supplied volatility. It uses the existing BSM European or fixed-step CRR American model, checks each endpoint independently, and exports complete inputs and readable diagnostics. It has no market-data downloader. The public browser workflow is documented below; native and browser row limits differ.
 
 ## Complete a task
 
@@ -46,4 +46,4 @@ Release runtime `6e481f344a2e549a0d2802b8dbb6f4b6bac329e3` passed [CI 3703846553
 
 The public deployment was checked on 2026-10-03 HKT. An invented European call with midpoint 10.8 produced IV 25.09723356%; transferring quantity -2 and multiplier 100 produced current model value -2,160.00 USD and full-revaluation P&L -236.29 USD for a 2% spot rise. The public quote JSON and scenario HTML were downloaded and their inputs, provenance and result inspected locally. The browser automation download observer timed out even though files were saved; direct file inspection established completion. Direct unauthenticated asset fetching returned HTTP 403, so an independent remote asset-byte comparison is not claimed. Deployment IDs are in publication.json.
 
-These checks establish an exercised software task, not external human adoption, live-market suitability or parity with an entire numerical library. Full independent Greek coverage, discrete cash dividends and surface calibration remain outside this release.
+These checks establish an exercised software task, not external human adoption, live-market suitability or parity with an entire numerical library. This frozen browser release does not include the later native full-Greek independent validator or numerical-sensitivity task. Those offline capabilities are documented in INDEPENDENT_VALIDATION.md and NUMERICAL_SENSITIVITY.md. Discrete cash dividends and surface calibration remain unsupported.

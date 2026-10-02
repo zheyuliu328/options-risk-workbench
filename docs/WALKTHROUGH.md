@@ -14,6 +14,18 @@ Implementation uses BSM with continuous dividends for European options and a 300
 
 Independent numerical challenges found fixed-bump errors in near-expiry, low-volatility Gamma and in Vega. Repairs were checked using analytic identities, high-precision references, a bounded parameter grid and browser-export recomputation. Passing tests does not establish universal accuracy or production adoption.
 
+## Continue from a supplied quote to a documented risk review
+
+This is a software rehearsal of a risk-review task using invented quotes, not an actual trading-desk deployment. Keep the quote report, portfolio report and any native diagnostics together.
+
+1. Open **Start from option quotes**. Run the invented example or import the documented quote JSON. Check the contract, exercise style, bid/ask order and each endpoint status. A solved inverse price does not establish quote authenticity or executable liquidity.
+2. Explicitly choose a solved bid, midpoint or ask estimate and enter signed quantity and multiplier. The endpoint choice is an input assumption; it is not an instruction to trade. Open the selected positions in scenarios.
+3. Check that strike, expiry, exercise style and annual volatility survived the transfer. Add a small and a large spot shock; compare full-revaluation P&L with the local approximation. Download the quote report and portfolio report. The latter records the quote-selection source note.
+4. For optional offline numerical review, save the portfolio JSON and run `python -m options_risk.diagnostics INPUT.json --position EXACT_ID --output NEW_DIRECTORY`. This command expects the plain portfolio request; when using a browser result download, extract its `request` object to a new JSON file first. Never overwrite the original download. The task examines one selected contract and shared market inputs; it does not validate the remaining contracts or scenarios.
+5. Read the step and bump tables. A valid price can coexist with unavailable Greeks; odd/even tree results may oscillate. No best row is selected. An independent reference is a separate optional task described in [INDEPENDENT_VALIDATION.md](INDEPENDENT_VALIDATION.md), not something this within-engine diagnostic proves.
+
+The numerical-sensitivity controls are not yet in the public browser. See [QUOTE_REVIEW.md](QUOTE_REVIEW.md) for verified browser release evidence and [NUMERICAL_SENSITIVITY.md](NUMERICAL_SENSITIVITY.md) for the current native contract. Human first-use acceptance and the owner's ability to explain the task remain pending.
+
 ## English introduction — about three minutes at a measured pace
 
 I built Options Risk Workbench to make a specific risk-analysis task reproducible: take a fixed option portfolio, change market assumptions, and explain the resulting change in model value. It is a browser-based tool that runs calculations locally, so the user can try invented examples or enter their own positions without uploading data.
