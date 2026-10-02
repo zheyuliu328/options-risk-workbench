@@ -75,3 +75,7 @@ The optional offline validator compares fixed contracts against QuantLib analyti
 ## Start from option quotes
 
 The [quote review workflow](docs/QUOTE_REVIEW.md) accepts invented or locally supplied bid/ask premiums and calculates model-consistent European or American implied volatility. It preserves invalid rows, flags unresolved boundaries and low sensitivity, and reports American tree-step differences. [Read the invented example report](docs/quote-review-example/report.html). The [public quote tool](https://options-risk-zheyuliu.mystic-pear-2111.chatgpt.site/quotes) supports browser-local input, JSON import, diagnostic reports and explicit transfer of selected solved endpoints to a scenario portfolio. Enter quantity and multiplier deliberately; quote premiums alone do not determine a position.
+
+## Inspect numerical sensitivity
+
+The optional native [single-contract diagnostic](docs/NUMERICAL_SENSITIVITY.md) retains fixed odd/even step counts, fixed perturbations, all endpoint prices and unavailable states. It preserves valid prices when Greeks fail and does not select a best row or alter portfolio inputs. Browser controls for this task are not yet published.
