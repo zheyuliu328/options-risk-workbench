@@ -52,6 +52,39 @@ class IndependentReferenceTests(unittest.TestCase):
         self.assertAlmostEqual(d['scenario_reference'][0]['reference_pnl'], expected, places=8)
         self.assertTrue(all('reference_mesh_threshold' in c for c in p['unit_checks']))
 
+    def test_shocked_reference_refinement_is_checked_without_offset_masking(self):
+        r = fixture()
+        r['positions'].append({**r['positions'][0], 'id': 'offset', 'quantity': -1})
+        original = reference
+        def unstable(*args, **kwargs):
+            result = original(*args, **kwargs)
+            mesh = args[5] if len(args) > 5 else kwargs.get('mesh', 1600)
+            if mesh == 800 and args[3] > r['spot']:
+                result['price'] += .1
+            return result
+        with patch('options_risk.validation.reference', side_effect=unstable):
+            d = investigate(r)
+        self.assertEqual(d['attention_count'], 0)
+        self.assertEqual(d['scenario_attention_count'], 1)
+        row = d['scenario_reference'][1]
+        self.assertAlmostEqual(row['reference_pnl_mesh_difference'], 0)
+        self.assertEqual(row['reference_refinement_status'], 'reference_mesh_unstable')
+        self.assertEqual(len(row['position_refinement']), 2)
+        self.assertTrue(all(p['status'] == 'reference_mesh_unstable'
+                            for p in row['position_refinement']))
+        self.assertIn('Scenario reference P&amp;L refinement', render(d))
+
+    def test_scenario_grid_identity_and_zero_exposure_rejected(self):
+        r = fixture()
+        d = investigate(r)
+        self.assertEqual(d['scenario_attention_count'], 0)
+        for row in d['scenario_reference']:
+            self.assertAlmostEqual(row['reference_pnl'], row['reference_pnl_800'], places=10)
+            self.assertEqual(row['reference_refinement_status'], 'within_refinement_screen')
+        r['positions'][0]['quantity'] = 0
+        with self.assertRaisesRegex(ValueError, 'nonzero signed integer'):
+            investigate(r)
+
     def test_unstable_reference_cannot_report_unqualified_agreement(self):
         original = reference
         def unstable(*args, **kwargs):

@@ -26,7 +26,7 @@ POLICY = {
     "tree_steps": [150, 151, 300, 301, 600, 601],
     "fd_meshes": [800, 1600],
     "reference_refinement_fraction": .25,
-    "revision": "3: convention-matched Vega/Rho/one-day Theta; retrospective screening, not blind validation",
+    "revision": "4: per-position scenario PnL mesh screening plus convention-matched Greeks; retrospective, not blind validation",
 }
 
 
@@ -200,21 +200,49 @@ def investigate(request):
                                     "reference_800": coarse, "reference_1600": fine,
                                     "fd_price_refinement": fine['price'] - coarse['price'],
                                     "tree_diagnostics": tree})
-    reference_base = sum(reference(request, p, request['as_of'], request['spot'],
-                                   p['volatility'])['price'] * p['quantity'] * p['multiplier']
-                         for p in request['positions'])
+    reference_base = sum(p['reference_1600']['price'] * p['signed_exposure']
+                         for p in output['positions'])
+    coarse_base = sum(p['reference_800']['price'] * p['signed_exposure']
+                      for p in output['positions'])
     for scenario, actual in zip(request['scenarios'], result['scenarios']):
         when = (start + timedelta(days=scenario.get('days', 0))).isoformat()
         new_spot = request['spot'] * (1 + scenario.get('spot_return', 0))
-        value = sum(reference(request, p, when, new_spot,
-                              p['volatility'] + scenario.get('vol_change', 0))['price']
-                    * p['quantity'] * p['multiplier'] for p in request['positions'])
+        values = {800: 0.0, 1600: 0.0}
+        refinements = []
+        for p, base in zip(request['positions'], output['positions']):
+            scenario_prices = {mesh: reference(request, p, when, new_spot,
+                p['volatility'] + scenario.get('vol_change', 0), mesh)['price']
+                for mesh in values}
+            exposure = base['signed_exposure']
+            for mesh in values:
+                values[mesh] += scenario_prices[mesh] * exposure
+            pnl_refinement = ((scenario_prices[1600] - base['reference_1600']['price']) -
+                              (scenario_prices[800] - base['reference_800']['price'])) * exposure
+            price_policy = POLICY[p['style']]
+            # Sum the two endpoint screening scales; this is not an error bound.
+            endpoint_scale = sum(max(price_policy['price_abs'],
+                price_policy.get('price_rel', 0) * abs(v)) for v in
+                (scenario_prices[1600], base['reference_1600']['price']))
+            threshold = abs(exposure) * endpoint_scale * POLICY['reference_refinement_fraction']
+            refinements.append({'id': p['id'], 'signed_exposure': exposure,
+                'pnl_mesh_difference': pnl_refinement, 'mesh_threshold': threshold,
+                'status': 'reference_mesh_unstable' if abs(pnl_refinement) > threshold
+                          else 'within_refinement_screen'})
         approximate = sum(p['greek_approximation'] for p in actual['positions'])
-        output['scenario_reference'].append({"name": scenario['name'],
-            "workbench_pnl": actual['pnl'], "reference_pnl": value - reference_base,
-            "engine_pnl_difference": actual['pnl'] - (value - reference_base),
-            "workbench_local_approximation": approximate,
-            "workbench_approximation_residual": actual['pnl'] - approximate})
+        reference_pnl = values[1600] - reference_base
+        output['scenario_reference'].append({'name': scenario['name'],
+            'workbench_pnl': actual['pnl'], 'reference_pnl': reference_pnl,
+            'engine_pnl_difference': actual['pnl'] - reference_pnl,
+            'workbench_local_approximation': approximate,
+            'workbench_approximation_residual': actual['pnl'] - approximate,
+            'reference_pnl_800': values[800] - coarse_base,
+            'reference_pnl_mesh_difference': reference_pnl - (values[800] - coarse_base),
+            'reference_refinement_status': 'reference_mesh_unstable' if any(
+                row['status'] == 'reference_mesh_unstable' for row in refinements)
+                else 'within_refinement_screen',
+            'position_refinement': refinements})
+    output['scenario_attention_count'] = sum(row['reference_refinement_status'] ==
+        'reference_mesh_unstable' for row in output['scenario_reference'])
     output['attention_count'] = sum(c['status'] in ['investigate', 'reference_mesh_unstable', 'reference_unavailable']
         for p in output['positions'] for c in p['unit_checks'])
     return output
@@ -258,6 +286,9 @@ def render(investigation):
         ['name', 'workbench_pnl', 'reference_pnl', 'engine_pnl_difference',
          'workbench_local_approximation', 'workbench_approximation_residual']) + '</tr>'
         for row in investigation['scenario_reference'])
+    scenario_grid_rows = ''.join('<tr>' + ''.join('<td>' + esc(value) + '</td>' for value in
+        [row['name'], p['id'], p['pnl_mesh_difference'], p['mesh_threshold'], p['status']]) + '</tr>'
+        for row in investigation['scenario_reference'] for p in row.get('position_refinement', []))
     unit_rows = ''.join('<tr>' + ''.join('<td>' + esc(value) + '</td>' for value in
         [p['id'], c['metric'], c.get('own', 'not compared'), c.get('reference', ''),
          c.get('difference', ''), c.get('threshold', ''), c.get('reference_mesh_difference', ''),
@@ -290,11 +321,11 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}h1{font-size:28px
 <h1>Independent option revaluation investigation</h1>
 <p>Fixed contracts, conditional model comparisons and local-approximation risk.
 This report is not market-price certification, trading performance or VaR.</p>
-<p>QuantLib version: ''' + esc(investigation['quantlib_version']) + '''. Unit-level checks requiring investigation: ''' + esc(investigation['attention_count']) + '''.</p>
+<p>QuantLib version: ''' + esc(investigation['quantlib_version']) + '''. Unit-level checks requiring investigation: ''' + esc(investigation['attention_count']) + '''. Scenarios with unstable reference P&amp;L: ''' + esc(investigation.get('scenario_attention_count', 0)) + '''.</p>
 ''' + portfolio + '''<h2>Scenario P&amp;L and approximation residual</h2><div class="scroll"><table><tr>
 <th>Scenario</th><th>Workbench P&amp;L</th><th>Reference P&amp;L</th>
 <th>Engine difference</th><th>Local approximation</th><th>Approximation residual</th></tr>''' + rows + '''</table></div>
-''' + source_section + '''<h2>Independent unit-level checks</h2><p>Price and all five reported Greeks are compared before signed quantity and multiplier scaling. Vega is per volatility point, Rho per rate point and Theta is the next-calendar-day value change. Reference refinement is calculated separately for each sensitivity. Thresholds flag investigation, not acceptance; added Greek screening thresholds are retrospective.</p><div class="scroll"><table><tr><th>Position</th><th>Metric</th><th>Workbench</th><th>Reference</th><th>Difference</th><th>Threshold</th><th>Reference mesh difference</th><th>Mesh threshold</th><th>Status</th><th>Unit</th><th>Method / unavailable reason</th></tr>''' + unit_rows + '''</table></div><h2>CRR step sensitivity</h2><p>Odd/even sequences may oscillate. More steps do not guarantee monotonic improvement.</p><div class="scroll"><table><tr><th>Position</th><th>Steps</th><th>Unit price</th><th>Delta</th><th>Gamma</th><th>Vega / point</th><th>Rho / point</th><th>Theta / day</th></tr>''' + tree_rows + '''</table></div><h2>Signed position comparisons</h2><p>Unit values are multiplied by quantity × multiplier. A short position reverses the sign. Unit-level status is retained; no portfolio acceptance threshold is inferred.</p><div class="scroll"><table><tr><th>Position</th><th>Signed exposure</th><th>Metric</th><th>Workbench</th><th>Reference</th><th>Difference</th><th>Unit status</th></tr>''' + scaled_rows + '''</table></div><h2>Interpretation and limits</h2><ul>''' + ''.join('<li>' + esc(x) + '</li>' for x in investigation['limits']) + '''</ul>
+''' + source_section + '''<h2>Scenario reference P&amp;L refinement</h2><p>Each position's reference P&amp;L is rebuilt on both grids. Offsetting position errors cannot hide an unstable position. The screen sums the base and shocked price scales, multiplied by absolute exposure; it is retrospective and is not a numerical error bound or a risk limit. Stable P&amp;L refinement does not establish stable endpoint prices or workbench agreement.</p><div class="scroll"><table><tr><th>Scenario</th><th>Position</th><th>P&amp;L mesh difference</th><th>Mesh threshold</th><th>Status</th></tr>''' + scenario_grid_rows + '''</table></div><h2>Independent unit-level checks</h2><p>Price and all five reported Greeks are compared before signed quantity and multiplier scaling. Vega is per volatility point, Rho per rate point and Theta is the next-calendar-day value change. Reference refinement is calculated separately for each sensitivity. Thresholds flag investigation, not acceptance; added Greek screening thresholds are retrospective.</p><div class="scroll"><table><tr><th>Position</th><th>Metric</th><th>Workbench</th><th>Reference</th><th>Difference</th><th>Threshold</th><th>Reference mesh difference</th><th>Mesh threshold</th><th>Status</th><th>Unit</th><th>Method / unavailable reason</th></tr>''' + unit_rows + '''</table></div><h2>CRR step sensitivity</h2><p>Odd/even sequences may oscillate. More steps do not guarantee monotonic improvement.</p><div class="scroll"><table><tr><th>Position</th><th>Steps</th><th>Unit price</th><th>Delta</th><th>Gamma</th><th>Vega / point</th><th>Rho / point</th><th>Theta / day</th></tr>''' + tree_rows + '''</table></div><h2>Signed position comparisons</h2><p>Unit values are multiplied by quantity × multiplier. A short position reverses the sign. Unit-level status is retained; no portfolio acceptance threshold is inferred.</p><div class="scroll"><table><tr><th>Position</th><th>Signed exposure</th><th>Metric</th><th>Workbench</th><th>Reference</th><th>Difference</th><th>Unit status</th></tr>''' + scaled_rows + '''</table></div><h2>Interpretation and limits</h2><ul>''' + ''.join('<li>' + esc(x) + '</li>' for x in investigation['limits']) + '''</ul>
 <details><summary>Frozen inputs, methods and complete diagnostics</summary><p>Includes 800/1600 FDM refinement. Numerical agreement does not establish source quality.</p><pre>''' + esc(json.dumps(investigation, indent=2, allow_nan=False)) + '</pre></details></main></html>'
 
 
@@ -322,6 +353,7 @@ def main():
     except (ImportError, ValueError, KeyError, TypeError, OSError, RuntimeError, OverflowError) as exc:
         parser.error(str(exc))
     print(json.dumps({"output": str(args.output), "attention_count": investigation['attention_count'],
+                      "scenario_attention_count": investigation['scenario_attention_count'],
                       "status": "investigation_complete_not_model_approval"}))
 
 
