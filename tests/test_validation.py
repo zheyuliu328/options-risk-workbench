@@ -1,6 +1,8 @@
 import copy
 import importlib.util
 import math
+import json
+import hashlib
 from pathlib import Path
 import tempfile
 import unittest
@@ -20,6 +22,54 @@ def fixture():
 
 @unittest.skipUnless(importlib.util.find_spec('QuantLib'), 'optional QuantLib reference unavailable')
 class IndependentReferenceTests(unittest.TestCase):
+    def test_zero_volatility_matched_payoff_differences(self):
+        for spot in (99, 99.95, 100, 100.05, 101):
+            for kind in ('call', 'put'):
+                r = fixture()
+                r.update(as_of='2026-01-01', spot=spot, rate=0, dividend_yield=0)
+                r['positions'][0].update(expiry='2027-01-01', volatility=0, kind=kind)
+                r['scenarios'] = [{'name': 'unchanged'}]
+                d = investigate(r)
+                checks = {c['metric']: c for c in d['positions'][0]['unit_checks']}
+                sign = 1 if kind == 'call' else -1
+                payoff = lambda s: max(sign * (s - 100), 0)
+                h = spot * .001
+                expected = {'delta': (payoff(spot+h)-payoff(spot-h))/(2*h),
+                            'gamma': (payoff(spot+h)-2*payoff(spot)+payoff(spot-h))/(h*h)}
+                for metric, value in expected.items():
+                    self.assertAlmostEqual(checks[metric]['reference'], value, places=9)
+                    self.assertEqual(checks[metric]['status'], 'within_threshold')
+                    self.assertIn('not a smooth derivative', checks[metric]['convention']['method'])
+
+    def test_tree_price_survives_greek_only_failure(self):
+        r = fixture()
+        r.update(as_of='2026-01-01', rate=.1, dividend_yield=0)
+        r['positions'][0].update(style='american', expiry='2027-01-01',
+                                 volatility=.1/math.sqrt(150)+.0005)
+        r['scenarios'] = [{'name': 'unchanged'}]
+        d = investigate(r)
+        row = d['positions'][0]['tree_diagnostics'][0]
+        self.assertEqual(row['steps'], 150)
+        self.assertEqual(row['price_status'], 'available')
+        self.assertAlmostEqual(row['price'], 100*(1-math.exp(-.1)), places=9)
+        self.assertEqual(row['greek_status'], 'unavailable')
+        self.assertIn('CRR probability', row['greek_error'])
+        self.assertIn('Price status', render(d))
+
+    def test_browser_download_cli_ignores_saved_result(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp)/'download.json'
+            raw = json.dumps({'request': fixture(), 'result': {'market_value': -999999}}).encode()
+            path.write_bytes(raw)
+            output = Path(temp)/'investigation'
+            with patch('sys.argv', ['validation', str(path), '--output', str(output)]):
+                main()
+            result = json.loads((output/'investigation.json').read_text())
+            self.assertEqual(result['input_format'], 'browser_portfolio_export')
+            self.assertEqual(result['input_sha256'], hashlib.sha256(raw).hexdigest())
+            self.assertEqual(result['attention_count'], 0)
+            self.assertNotEqual(result['workbench']['market_value'], -999999)
+            self.assertEqual(path.read_bytes(), raw)
     def test_analytic_identity_and_global_date_restored(self):
         import QuantLib as ql
         old = ql.Settings.instance().evaluationDate
@@ -247,6 +297,14 @@ class QuoteContextTests(unittest.TestCase):
         self.assertFalse(self.d['quote_diagnostics'][0]['inside_supplied_spread'])
         self.assertEqual(self.d['quote_diagnostics'][0]['model_minus_mid'], .75)
         self.assertIn('not authenticated', self.d['limits'][0])
+
+    def test_large_finite_quotes_keep_finite_midpoint(self):
+        self.c['quotes'][0].update(bid=1e308, ask=1.1e308)
+        attach_context(self.d, self.c)
+        value = self.d['quote_diagnostics'][0]['model_minus_mid']
+        self.assertTrue(math.isfinite(value))
+        self.assertAlmostEqual(value / 1e308, -1.05)
+        json.dumps(self.d, allow_nan=False)
 
     def test_invalid_quotes_and_date_mismatch_are_rejected(self):
         for change in [dict(bid=3., ask=2.), dict(bid=float('nan')),

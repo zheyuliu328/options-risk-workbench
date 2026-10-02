@@ -26,7 +26,7 @@ POLICY = {
     "tree_steps": [150, 151, 300, 301, 600, 601],
     "fd_meshes": [800, 1600],
     "reference_refinement_fraction": .25,
-    "revision": "4: per-position scenario PnL mesh screening plus convention-matched Greeks; retrospective, not blind validation",
+    "revision": "5: matched zero-volatility European spot differences and separate tree price/Greek availability; retrospective, not blind validation",
 }
 
 
@@ -101,11 +101,11 @@ def reference_sensitivities(request, position, valuation_date, spot, volatility,
             output['errors'][key] = 'Expiry derivatives are not compared as smooth sensitivities.'
         return output
 
-    def value(*, rate=None, vol=volatility, when=valuation_date):
+    def value(*, rate=None, vol=volatility, when=valuation_date, at_spot=spot):
         changed = dict(request)
         if rate is not None:
             changed['rate'] = rate
-        return reference(changed, position, when, spot, vol, mesh)['price']
+        return reference(changed, position, when, at_spot, vol, mesh)['price']
 
     def vega():
         if position['style'] == 'european' and volatility > 0:
@@ -121,6 +121,16 @@ def reference_sensitivities(request, position, valuation_date, spot, volatility,
         'rho_per_rate_point': lambda: (value(rate=rate + .0001) - value(rate=rate - .0001)) / .0002 * .01,
         'theta_per_day': lambda: value(when=(day + timedelta(days=1)).isoformat()) - base['price'],
     }
+    if position['style'] == 'european' and volatility == 0:
+        ds = spot * .001
+        for key in ('delta', 'gamma'):
+            output['conventions'][key].update(
+                method='matched central payoff difference; not a smooth derivative at a kink',
+                spot_bump=ds)
+        methods.update(
+            delta=lambda: (value(at_spot=spot + ds) - value(at_spot=spot - ds)) / (2 * ds),
+            gamma=lambda: (value(at_spot=spot + ds) - 2 * base['price']
+                           + value(at_spot=spot - ds)) / (ds * ds))
     for key, method in methods.items():
         try:
             result = method()
@@ -147,6 +157,7 @@ def investigate(request):
                   "Workbench theta is a one-calendar-day change, not QuantLib instantaneous theta.",
                   "No market quotation, source authenticity, profit or model approval is certified.",
                   "Expiry Greeks are nonsmooth and are not compared as differentiable values.",
+                  "Zero-volatility European Delta/Gamma comparisons use matched spot payoff differences, not smooth derivatives at a kink.",
                   "An unavailable base reference or production Greek fails the investigation explicitly; no complete report is claimed.",
                   "Exact-zero American volatility can make the independent FDM grid degenerate; no positive volatility is substituted."]}
     for position in request['positions']:
@@ -185,11 +196,16 @@ def investigate(request):
         tree = []
         if position['style'] == 'american':
             for steps in POLICY['tree_steps']:
+                row = {'steps': steps}
                 try:
-                    tree.append({"steps": steps, "price": price(**args, steps=steps),
-                                 **greeks(**args, steps=steps)})
-                except ValueError as exc:
-                    tree.append({"steps": steps, "error": str(exc)})
+                    row.update(price=price(**args, steps=steps), price_status='available')
+                except (ValueError, OverflowError, ZeroDivisionError) as exc:
+                    row.update(price_status='unavailable', price_error=str(exc), error=str(exc))
+                try:
+                    row.update(**greeks(**args, steps=steps), greek_status='available')
+                except (ValueError, OverflowError, ZeroDivisionError) as exc:
+                    row.update(greek_status='unavailable', greek_error=str(exc), error=str(exc))
+                tree.append(row)
         exposure = position['quantity'] * position['multiplier']
         scaled = [{"metric": c['metric'], "own": c.get('own') * exposure if c.get('own') is not None else None,
                    "reference": c.get('reference') * exposure if c.get('reference') is not None else None,
@@ -265,8 +281,12 @@ def attach_context(investigation, context):
         if quote['date'] != investigation['request']['as_of']:
             raise ValueError('quote date must match valuation date; intraday synchrony remains unverified')
         own = positions[identity]['unit_checks'][0]['own']
+        midpoint = bid + (ask - bid) / 2
+        difference = own - midpoint
+        if not math.isfinite(midpoint) or not math.isfinite(difference):
+            raise ValueError('quote comparison exceeds numeric range')
         diagnostics.append({"id": identity, "bid": bid, "ask": ask,
-                            "model_price": own, "model_minus_mid": own - (bid + ask) / 2,
+                            "model_price": own, "model_minus_mid": difference,
                             "inside_supplied_spread": bid <= own <= ask,
                             "interpretation": "Conditional discrepancy only; timing, rates, dividends and IV may differ"})
     investigation['source_context'] = context
@@ -296,8 +316,10 @@ def render(investigation):
          c.get('detail') or c.get('convention', {}).get('method', '')]) + '</tr>'
         for p in investigation['positions'] for c in p['unit_checks'])
     tree_rows = ''.join('<tr>' + ''.join('<td>' + esc(value) + '</td>' for value in
-        [p['id'], t['steps'], t.get('price', t.get('error')), t.get('delta', ''), t.get('gamma', ''),
-         t.get('vega_per_vol_point', ''), t.get('rho_per_rate_point', ''), t.get('theta_per_day', '')])
+        [p['id'], t['steps'], t.get('price', ''), t.get('price_status', ''),
+         t.get('delta', ''), t.get('gamma', ''), t.get('vega_per_vol_point', ''),
+         t.get('rho_per_rate_point', ''), t.get('theta_per_day', ''), t.get('greek_status', ''),
+         '; '.join(x for x in (t.get('price_error'), t.get('greek_error')) if x)])
         + '</tr>' for p in investigation['positions'] for t in p['tree_diagnostics'])
     scaled_rows = ''.join('<tr>' + ''.join('<td>' + esc(value) + '</td>' for value in
         [p['id'], p['signed_exposure'], c['metric'], c.get('own'), c.get('reference'),
@@ -325,11 +347,12 @@ This report is not market-price certification, trading performance or VaR.</p>
 ''' + portfolio + '''<h2>Scenario P&amp;L and approximation residual</h2><div class="scroll"><table><tr>
 <th>Scenario</th><th>Workbench P&amp;L</th><th>Reference P&amp;L</th>
 <th>Engine difference</th><th>Local approximation</th><th>Approximation residual</th></tr>''' + rows + '''</table></div>
-''' + source_section + '''<h2>Scenario reference P&amp;L refinement</h2><p>Each position's reference P&amp;L is rebuilt on both grids. Offsetting position errors cannot hide an unstable position. The screen sums the base and shocked price scales, multiplied by absolute exposure; it is retrospective and is not a numerical error bound or a risk limit. Stable P&amp;L refinement does not establish stable endpoint prices or workbench agreement.</p><div class="scroll"><table><tr><th>Scenario</th><th>Position</th><th>P&amp;L mesh difference</th><th>Mesh threshold</th><th>Status</th></tr>''' + scenario_grid_rows + '''</table></div><h2>Independent unit-level checks</h2><p>Price and all five reported Greeks are compared before signed quantity and multiplier scaling. Vega is per volatility point, Rho per rate point and Theta is the next-calendar-day value change. Reference refinement is calculated separately for each sensitivity. Thresholds flag investigation, not acceptance; added Greek screening thresholds are retrospective.</p><div class="scroll"><table><tr><th>Position</th><th>Metric</th><th>Workbench</th><th>Reference</th><th>Difference</th><th>Threshold</th><th>Reference mesh difference</th><th>Mesh threshold</th><th>Status</th><th>Unit</th><th>Method / unavailable reason</th></tr>''' + unit_rows + '''</table></div><h2>CRR step sensitivity</h2><p>Odd/even sequences may oscillate. More steps do not guarantee monotonic improvement.</p><div class="scroll"><table><tr><th>Position</th><th>Steps</th><th>Unit price</th><th>Delta</th><th>Gamma</th><th>Vega / point</th><th>Rho / point</th><th>Theta / day</th></tr>''' + tree_rows + '''</table></div><h2>Signed position comparisons</h2><p>Unit values are multiplied by quantity × multiplier. A short position reverses the sign. Unit-level status is retained; no portfolio acceptance threshold is inferred.</p><div class="scroll"><table><tr><th>Position</th><th>Signed exposure</th><th>Metric</th><th>Workbench</th><th>Reference</th><th>Difference</th><th>Unit status</th></tr>''' + scaled_rows + '''</table></div><h2>Interpretation and limits</h2><ul>''' + ''.join('<li>' + esc(x) + '</li>' for x in investigation['limits']) + '''</ul>
+''' + source_section + '''<h2>Scenario reference P&amp;L refinement</h2><p>Each position's reference P&amp;L is rebuilt on both grids. Offsetting position errors cannot hide an unstable position. The screen sums the base and shocked price scales, multiplied by absolute exposure; it is retrospective and is not a numerical error bound or a risk limit. Stable P&amp;L refinement does not establish stable endpoint prices or workbench agreement.</p><div class="scroll"><table><tr><th>Scenario</th><th>Position</th><th>P&amp;L mesh difference</th><th>Mesh threshold</th><th>Status</th></tr>''' + scenario_grid_rows + '''</table></div><h2>Independent unit-level checks</h2><p>Price and all five reported Greeks are compared before signed quantity and multiplier scaling. Vega is per volatility point, Rho per rate point and Theta is the next-calendar-day value change. Reference refinement is calculated separately for each sensitivity. Thresholds flag investigation, not acceptance; added Greek screening thresholds are retrospective.</p><div class="scroll"><table><tr><th>Position</th><th>Metric</th><th>Workbench</th><th>Reference</th><th>Difference</th><th>Threshold</th><th>Reference mesh difference</th><th>Mesh threshold</th><th>Status</th><th>Unit</th><th>Method / unavailable reason</th></tr>''' + unit_rows + '''</table></div><h2>CRR step sensitivity</h2><p>Odd/even sequences may oscillate. More steps do not guarantee monotonic improvement.</p><div class="scroll"><table><tr><th>Position</th><th>Steps</th><th>Unit price</th><th>Price status</th><th>Delta</th><th>Gamma</th><th>Vega / point</th><th>Rho / point</th><th>Theta / day</th><th>Greek status</th><th>Unavailable reason</th></tr>''' + tree_rows + '''</table></div><h2>Signed position comparisons</h2><p>Unit values are multiplied by quantity × multiplier. A short position reverses the sign. Unit-level status is retained; no portfolio acceptance threshold is inferred.</p><div class="scroll"><table><tr><th>Position</th><th>Signed exposure</th><th>Metric</th><th>Workbench</th><th>Reference</th><th>Difference</th><th>Unit status</th></tr>''' + scaled_rows + '''</table></div><h2>Interpretation and limits</h2><ul>''' + ''.join('<li>' + esc(x) + '</li>' for x in investigation['limits']) + '''</ul>
 <details><summary>Frozen inputs, methods and complete diagnostics</summary><p>Includes 800/1600 FDM refinement. Numerical agreement does not establish source quality.</p><pre>''' + esc(json.dumps(investigation, indent=2, allow_nan=False)) + '</pre></details></main></html>'
 
 
 def main():
+    from .file_inputs import DOWNLOAD_LIMIT, portfolio_input
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('input', type=Path)
     parser.add_argument('--output', required=True, type=Path)
@@ -339,8 +362,11 @@ def main():
         parser.error('output exists; choose a new directory')
     try:
         raw = args.input.read_bytes()
-        request = json.loads(raw)
+        request, input_format = portfolio_input(json.loads(raw))
         investigation = investigate(request)
+        investigation['input_format'] = input_format
+        if input_format == 'browser_portfolio_export':
+            investigation['limits'].append(DOWNLOAD_LIMIT)
         if args.context:
             context_bytes = args.context.read_bytes()
             attach_context(investigation, json.loads(context_bytes))

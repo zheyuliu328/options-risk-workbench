@@ -13,6 +13,8 @@ python3 -m venv .venv
 
 Choose a new directory. Existing output is refused. Each task saves a self-contained HTML report, exact request/result, input SHA-256, reference engine version, investigation thresholds, unit-level comparisons and scenario results.
 
+The input may also be this tool's browser portfolio JSON download. Only its embedded `request` is recomputed; saved results and source notes are not authenticated or used as reference evidence. The original download is unchanged and its hash and input format are recorded. Supply independently declared provenance through `--context` when needed.
+
 [Standard synthetic investigation](independent-reference/standard/report.html) · [Synthetic approximation-failure investigation](independent-reference/counterexample/report.html). These frozen earlier reports retain their original price/Delta/Gamma scope; the full-Greek boundary report below records the current validator.
 
 ## Matched conventions and independent references
@@ -44,6 +46,8 @@ The offline validator now compares price and all five reported Greeks, with unit
 - Rho uses rates shifted by ±0.0001 with continuous dividend yield held fixed, reported per +0.01 rate. It is not silently substituted with an instantaneous analytic derivative.
 - Theta advances the valuation date by one calendar day with expiry fixed, comparing the resulting value change. QuantLib instantaneous theta divided by 365 is a different definition.
 - Both 800 and 1600 meshes independently rebuild each sensitivity. Reference price stability alone is insufficient to label a bumped Greek stable.
+
+Revision 5 corrects zero-volatility European Delta/Gamma comparisons: both engines now use the declared central spot payoff differences with bump 0.1% of spot. At or across the deterministic payoff kink these are finite-step values, not smooth derivatives. Price and other sensitivity definitions are unchanged; expiry smooth-Greek comparisons remain unavailable. Tree diagnostics also retain price availability independently of the Greek bundle: a failed volatility bump must not erase a valid base price. These repairs preserve the observed failures and do not change the production pricing engine.
 
 Run the original boundary example:
 
