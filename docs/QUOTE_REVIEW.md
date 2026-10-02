@@ -36,4 +36,14 @@ Capability references, inspected 2026-10-03:
 
 The implementation here is independent and uses only the standard library. QuantLib is an optional test reference. Its CRR class uses a different probability convention from this engine; identical step counts do not imply exact equality. These libraries offer substantially broader numerical capabilities. Adding this task does not establish overall parity with them.
 
-Remaining delivery: browser quote input/error recovery, explicit user-selected transfer to a portfolio, browser/offline export parity and deployed-version verification. Missing model capabilities include discrete cash dividends and surface calibration. Quotes do not establish source authenticity, point-in-time availability or executable liquidity.
+Missing model capabilities include discrete cash dividends and surface calibration. Quotes do not establish source authenticity, point-in-time availability or executable liquidity.
+
+## Browser task and release evidence
+
+Open the [quote tool](https://options-risk-zheyuliu.mystic-pear-2111.chatgpt.site/quotes), try the invented quotes or import the documented JSON. The browser accepts up to 10 contracts; the native tool accepts 20. Calculate, inspect each endpoint status and American step diagnostics, then download the quote report. Select a solved endpoint explicitly and enter a nonzero integer quantity and positive integer multiplier. Open the selected positions in scenarios or download portfolio JSON. Add market changes and calculate full revaluation. Retain both reports: the portfolio report records the selected quote source, while the quote report retains inverse-problem diagnostics.
+
+Release runtime `6e481f344a2e549a0d2802b8dbb6f4b6bac329e3` passed [CI 37038465539](https://github.com/zheyuliu328/options-risk-workbench/actions/runs/37038465539): 52 tests in each numerical job (optional independent references enabled in their own job), plus 264 browser/native numeric comparisons. Browser tasks cover invalid-input recovery, cancellation, explicit selection, signed quantities, multiplier validation, stale-result invalidation, JSON import and HTML/JSON downloads on desktop and narrow layouts.
+
+The public deployment was checked on 2026-10-03 HKT. An invented European call with midpoint 10.8 produced IV 25.09723356%; transferring quantity -2 and multiplier 100 produced current model value -2,160.00 USD and full-revaluation P&L -236.29 USD for a 2% spot rise. The public quote JSON and scenario HTML were downloaded and their inputs, provenance and result inspected locally. The browser automation download observer timed out even though files were saved; direct file inspection established completion. Direct unauthenticated asset fetching returned HTTP 403, so an independent remote asset-byte comparison is not claimed. Deployment IDs are in publication.json.
+
+These checks establish an exercised software task, not external human adoption, live-market suitability or parity with an entire numerical library. Full independent Greek coverage, discrete cash dividends and surface calibration remain outside this release.

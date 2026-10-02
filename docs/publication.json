@@ -1,15 +1,15 @@
 {
-  "published_at": "2026-09-30",
+  "published_at": "2026-10-03",
   "url": "https://options-risk-zheyuliu.mystic-pear-2111.chatgpt.site",
   "access": "public",
   "deployment_status": "succeeded",
   "project_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8",
-  "version_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8~appgver_be4a7d20fce08191b861d103192439da",
-  "deployment_id": "appgdep_6abc87e0230c819188842a12c1d63372",
-  "sites_source_sha": "89c995459ed1e5f8b897bdc6d2a7386f64d73dc3",
-  "github_runtime_sha": "7987b6085230ca8968b90d979267c641e43c50df",
-  "runtime_ci": 36666186828,
-  "verification": "Deployment status rechecked during presentation wrap-up. Runtime and UI unchanged from the English release; new documentation and samples do not require a new site deployment.",
+  "version_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8~appgver_4aec217ebd7481919bce9de42c41ce94",
+  "deployment_id": "appgdep_6abfe5053ccc81919d18ea04b94adf3a",
+  "sites_source_sha": "7eb71576bed11579d5d60a6b79dfa877496a7894",
+  "github_runtime_sha": "6e481f344a2e549a0d2802b8dbb6f4b6bac329e3",
+  "runtime_ci": 37038465539,
+  "verification": "Sites deployment succeeded; public browser quote calculation, explicit short-position transfer and scenario calculation checked. Downloaded quote JSON and portfolio HTML inspected. Direct unauthenticated asset fetch returned HTTP 403; remote byte parity not claimed. Documentation-only updates do not change this runtime.",
   "external_human_trial": "pending",
   "owner_explanation": "pending"
 }
