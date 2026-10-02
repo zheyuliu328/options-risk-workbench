@@ -9,7 +9,7 @@ python -m options_risk.diagnostics examples/greek-boundary.json --output /tmp/ne
 python -m options_risk.diagnostics examples/portfolio.json --position long-call --output /tmp/new-selected-contract
 ```
 
-For a multiple-position file, pass the exact ID from that file; never guess a contract. The second command requires an ID present in your request. Existing output directories are refused. Open report.html and keep diagnostics.json with the original input file.
+For a multiple-position file, pass the exact ID from that file; never guess a contract. The second command requires an ID present in your request. You can also pass a browser portfolio JSON download directly, without extracting its request by hand. Its `request` is recomputed; the stored `result` and optional `source_note` are ignored and are not authenticated or validated. The diagnostic output identifies the input format and SHA-256 of the original file. Existing output directories are refused. Open report.html and keep diagnostics.json with the original input file.
 
 The original boundary put uses spot 95, strike 100, thirty calendar days, rate 8%, zero continuous yield and volatility 20%. Its short quantity -2 and multiplier 100 produce exposure -200. All values are invented.
 

@@ -169,8 +169,21 @@ def main():
         parser.error('output exists; choose a new directory')
     try:
         raw = args.input.read_bytes()
-        result = diagnose(json.loads(raw), args.position)
+        payload = json.loads(raw)
+        browser_export = isinstance(payload, dict) and 'request' in payload
+        if browser_export:
+            fields(payload, ['request', 'result', 'source_note'], ['request', 'result'], 'browser export')
+            if not isinstance(payload['request'], dict) or not isinstance(payload['result'], dict):
+                raise ValueError('browser export request and result must be objects')
+            if 'source_note' in payload and not isinstance(payload['source_note'], str):
+                raise ValueError('browser export source_note must be text')
+        result = diagnose(payload['request'] if browser_export else payload, args.position)
         result['input_sha256'] = hashlib.sha256(raw).hexdigest()
+        result['input_format'] = 'browser_portfolio_export' if browser_export else 'portfolio_request'
+        if browser_export:
+            result['limits'].append(
+                'Only the downloaded request was recomputed. Stored results and source notes '
+                'were not used, authenticated or validated; the file hash identifies the original download.')
         report = render(result)
         args.output.mkdir(parents=True, exist_ok=False)
         (args.output / 'diagnostics.json').write_text(json.dumps(result, indent=2, allow_nan=False) + '\n')

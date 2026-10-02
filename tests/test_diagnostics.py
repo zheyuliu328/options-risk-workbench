@@ -126,3 +126,28 @@ class NumericalDiagnosticsTests(unittest.TestCase):
                 with self.assertRaises(SystemExit):
                     main()
             self.assertEqual(marker.read_text(), 'preserved')
+
+    def test_browser_download_recomputes_request_and_preserves_original(self):
+        import hashlib
+        with tempfile.TemporaryDirectory() as temp:
+            original = Path(temp) / 'download.json'
+            # Deliberately false stored output must never influence the recomputation.
+            raw = json.dumps({'request': fixture(), 'result': {'market_value': -999999},
+                              'source_note': 'Unverified imported quote'}).encode()
+            original.write_bytes(raw)
+            target = Path(temp) / 'review'
+            with patch('sys.argv', ['diagnostics', str(original), '--output', str(target)]):
+                main()
+            actual = json.loads((target / 'diagnostics.json').read_text())
+            expected = diagnose(fixture())
+            self.assertEqual(actual['step_results'], expected['step_results'])
+            self.assertEqual(actual['bump_results'], expected['bump_results'])
+            self.assertEqual(actual['input_sha256'], hashlib.sha256(raw).hexdigest())
+            self.assertEqual(actual['input_format'], 'browser_portfolio_export')
+            self.assertEqual(original.read_bytes(), raw)
+            self.assertIn('Stored results and source notes', (target / 'report.html').read_text())
+            original.write_text(json.dumps({'request': fixture(), 'result': [], 'extra': 1}))
+            with patch('sys.argv', ['diagnostics', str(original), '--output', str(Path(temp) / 'bad')]):
+                with self.assertRaises(SystemExit):
+                    main()
+            self.assertFalse((Path(temp) / 'bad').exists())
