@@ -78,4 +78,4 @@ The [quote review workflow](docs/QUOTE_REVIEW.md) accepts invented or locally su
 
 ## Inspect numerical sensitivity
 
-The optional native [single-contract diagnostic](docs/NUMERICAL_SENSITIVITY.md) retains fixed odd/even step counts, fixed perturbations, all endpoint prices and unavailable states. It preserves valid prices when Greeks fail and does not select a best row or alter portfolio inputs. Browser controls for this task are not yet published.
+The optional native [single-contract diagnostic](docs/NUMERICAL_SENSITIVITY.md) retains fixed odd/even step counts, fixed perturbations, all endpoint prices and unavailable states. It preserves valid prices when Greeks fail and does not select a best row or alter portfolio inputs. This task is also available in the public browser under **Inspect numerical sensitivity for one position**.

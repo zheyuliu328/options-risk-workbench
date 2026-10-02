@@ -4,12 +4,12 @@
   "access": "public",
   "deployment_status": "succeeded",
   "project_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8",
-  "version_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8~appgver_4aec217ebd7481919bce9de42c41ce94",
-  "deployment_id": "appgdep_6abfe5053ccc81919d18ea04b94adf3a",
-  "sites_source_sha": "7eb71576bed11579d5d60a6b79dfa877496a7894",
-  "github_runtime_sha": "6e481f344a2e549a0d2802b8dbb6f4b6bac329e3",
-  "runtime_ci": 37038465539,
-  "verification": "Sites deployment succeeded; public browser quote calculation, explicit short-position transfer and scenario calculation checked. Downloaded quote JSON and portfolio HTML inspected. Direct unauthenticated asset fetch returned HTTP 403; remote byte parity not claimed. Documentation-only updates do not change this runtime.",
+  "version_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8~appgver_79fc67db92308191b475bb2f5ce13921",
+  "deployment_id": "appgdep_6ac00deaa664819184acc495b1370b68",
+  "sites_source_sha": "27ae824eceeef63fb716319a092dcd63f3492804",
+  "github_runtime_sha": "721087e328295cfac7355d5108b9964a739a49d4",
+  "runtime_ci": 37051974420,
+  "verification": "Sites version 9 deployed successfully. Public boundary-put numerical task completed; six step rows and six bump rows displayed. HTML/JSON downloaded; 126 numerical export fields matched native recomputation within 1e-9 relative/absolute tolerance. Earlier quote-to-portfolio task remains covered by runtime regression. Later native CLI and independent-validator changes are not represented as browser features. Human acceptance remains pending.",
   "external_human_trial": "pending",
   "owner_explanation": "pending"
 }

@@ -24,7 +24,7 @@ This is a software rehearsal of a risk-review task using invented quotes, not an
 4. For optional offline numerical review, save the portfolio JSON and run `python -m options_risk.diagnostics INPUT.json --position EXACT_ID --output NEW_DIRECTORY`. The command accepts a plain portfolio request or this tool's browser portfolio download directly. For a download, it recomputes only the embedded request and records the original file hash; stored results and source notes are not treated as validated evidence. Never overwrite the original download. The task examines one selected contract and shared market inputs; it does not validate the remaining contracts or scenarios.
 5. Read the step and bump tables. A valid price can coexist with unavailable Greeks; odd/even tree results may oscillate. No best row is selected. An independent reference is a separate optional task described in [INDEPENDENT_VALIDATION.md](INDEPENDENT_VALIDATION.md), not something this within-engine diagnostic proves.
 
-The numerical-sensitivity controls are not yet in the public browser. See [QUOTE_REVIEW.md](QUOTE_REVIEW.md) for verified browser release evidence and [NUMERICAL_SENSITIVITY.md](NUMERICAL_SENSITIVITY.md) for the current native contract. Human first-use acceptance and the owner's ability to explain the task remain pending.
+The public browser provides the optional numerical-sensitivity controls described above; select a position before running the task. See [QUOTE_REVIEW.md](QUOTE_REVIEW.md) for verified browser release evidence and [NUMERICAL_SENSITIVITY.md](NUMERICAL_SENSITIVITY.md) for the current native contract. Human first-use acceptance and the owner's ability to explain the task remain pending.
 
 ## English introduction — about three minutes at a measured pace
 

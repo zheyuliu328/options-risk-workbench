@@ -1,6 +1,6 @@
 # Single-contract numerical sensitivity
 
-This optional native task uses the existing pricing engine to show how step counts and perturbation sizes affect one selected contract. It has no extra dependency and does not change production pricing, select a best answer or validate the rest of the portfolio. The development browser now contains this optional task; public publication is still pending.
+This optional native task uses the existing pricing engine to show how step counts and perturbation sizes affect one selected contract. It has no extra dependency and does not change production pricing, select a best answer or validate the rest of the portfolio. The public browser also contains this optional task; version 9 was deployed and exercised on 2026-10-03.
 
 ## Run an original case
 
@@ -31,7 +31,7 @@ Only the selected contract and shared market inputs are examined. Input position
 
 Continuous dividend yield is not a discrete cash-dividend schedule. Flat volatility, ACT/365 and the selected exercise style remain conditional assumptions. There is no market data retrieval, model approval, significance claim, trade recommendation or profit result. These are agent-operated software diagnostics, not external human acceptance.
 
-## Development browser task (not yet published)
+## Public browser task
 
 Choose the invented **Tree sensitivity: boundary put** example, or enter positions and expand **Inspect numerical sensitivity for one position**. Select the exact ID and inspect. The controls validate only shared market inputs and the selected row; invalid scenarios do not prevent this scoped task. Duplicate IDs are still rejected. Empty numeric fields are never converted into assumed zero inputs.
 
