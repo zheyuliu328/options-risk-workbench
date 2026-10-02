@@ -52,7 +52,19 @@ $('#case-choice').onchange=loadExample;
 $('#try-example').onclick=()=>{loadExample();form.requestSubmit()};
 $('#own-position').onclick=()=>{load(example);$('#positions tbody').replaceChildren();addPosition({...example.positions[0],id:'position-1'});['underlying','currency','as_of','spot','rate','dividend_yield'].forEach(k=>form.elements[k].value='');$('#positions tbody').querySelectorAll('input').forEach(e=>{if(e.dataset.key!=='id')e.value=''});$('#scenarios tbody').replaceChildren();addScenario({name:'Unchanged',spot_return:0,vol_change:0,days:0});$('#case-note').textContent='Custom portfolio: you supply all inputs. The model does not read live market data.';$('#own-note').hidden=false;form.elements.underlying.focus();};
 $('#add-position').onclick=()=>{sourceNote='';try{addPosition({...example.positions[0],id:'position-'+(Date.now()%100000)});invalidate()}catch(e){error(e)}};$('#add-scenario').onclick=()=>{try{addScenario({name:'New scenario',spot_return:0,vol_change:0,days:0});invalidate()}catch(e){error(e)}};
-$('#import').onclick=()=>$('#file').click();$('#file').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;invalidate();if(f.size>1024*1024)throw Error('JSON file limit: 1 MiB');let payload=JSON.parse(await f.text());let q=payload.request||payload;validateImport(q);load(q);sourceNote=typeof payload.source_note==='string'?payload.source_note.slice(0,4000):'';$('#own-note').hidden=true;$('#case-note').textContent='Custom portfolio imported. Check inputs before calculating.'}catch(e){error(e)}finally{$('#file').value=''}};
+$('#import').onclick=()=>$('#file').click();
+$('#file').onchange=async e=>{
+ const f=e.target.files[0];if(!f)return;
+ const id=++serial;invalidate();$('#error').hidden=true;setBusy(true);$('#status').textContent='Reading selected portfolio JSON…';
+ try{if(f.size>1024*1024)throw Error('JSON file limit: 1 MiB');
+  const raw=await f.text();if(id!==serial)return;
+  const payload=JSON.parse(raw),q=payload.request||payload;validateImport(q);load(q);
+  sourceNote=typeof payload.source_note==='string'?payload.source_note.slice(0,4000):'';
+  $('#own-note').hidden=true;$('#case-note').textContent='Custom portfolio imported. Check inputs before calculating.';
+  $('#status').textContent='Portfolio imported. Ready to calculate.';
+ }catch(e){if(id===serial){error(e);$('#status').textContent='Import failed; previous inputs remain, but old results are cleared.';}}
+ finally{if(id===serial)setBusy(false);$('#file').value=''}
+};
 function keys(o,allowed,required){if(!o||typeof o!=='object'||Array.isArray(o)||Object.keys(o).some(k=>!allowed.includes(k))||required.some(k=>!(k in o)))throw Error('File fields do not match the input schema. Download example results as a template.')}
 function validateImport(q){keys(q,['underlying','currency','as_of','spot','rate','dividend_yield','positions','scenarios'],['underlying','currency','as_of','spot','positions','scenarios']);if(!Array.isArray(q.positions)||!q.positions.length||q.positions.length>10||!Array.isArray(q.scenarios)||!q.scenarios.length||q.scenarios.length>10)throw Error('Provide 1–10 positions and 1–10 scenarios');q.positions.forEach(p=>{const k=['id','kind','style','strike','expiry','quantity','multiplier','volatility'];keys(p,k,k);if(!['call','put'].includes(p.kind)||!['american','european'].includes(p.style))throw Error('Unsupported option type or exercise style')});q.scenarios.forEach(s=>keys(s,['name','spot_return','vol_change','days'],['name']));validateNumbers(q)}
 function validateNumbers(q){
