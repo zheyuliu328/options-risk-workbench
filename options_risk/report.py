@@ -2,13 +2,14 @@
 from html import escape
 
 
-def render(result, request=None):
+def render(result, request=None, source_note=None):
     def text(value):
         return escape(str(value), quote=True)
 
     def money(value):
         return f'{value:,.2f}'
 
+    source_section = f'<p>{text(source_note)}</p>' if source_note else ''
     contracts = {p['id']: p for p in request['positions']} if request else {}
     input_columns = '<th>Kind</th><th>Style</th><th>Annual vol</th>' if request else ''
     def contract_cells(p):
@@ -32,7 +33,7 @@ def render(result, request=None):
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Option risk review</title>
 <style>body{{margin:0;background:#f5f7fa;color:#192536;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1050px;margin:32px auto;padding:28px;background:white}}h1{{font-size:28px;margin:0}}h2{{font-size:20px;margin-top:32px}}.meta{{color:#4c596b}}.value{{font-size:30px;font-variant-numeric:tabular-nums}}table{{border-collapse:collapse;width:100%;font-size:14px}}th,td{{border-bottom:1px solid #dbe0e8;padding:12px;text-align:right;white-space:nowrap}}th:first-child,td:first-child{{text-align:left}}th{{background:#eef2f7}}.scroll{{overflow:auto}}details{{margin:12px 0;border:1px solid #dbe0e8;padding:12px}}summary{{cursor:pointer}}li{{margin:8px 0}}@media(max-width:600px){{main{{margin:0;padding:18px}}}}@media print{{main{{margin:0}}details{{break-inside:avoid}}}}</style></head><body><main>
 <h1>Option risk review</h1><p class="meta">{text(result['underlying'])} · {text(result['currency'])} · {text(result['as_of'])}</p>
-<p>Signed model value</p><div class="value">{money(result['market_value'])} {text(result['currency'])}</div>
+{source_section}<p>Signed model value</p><div class="value">{money(result['market_value'])} {text(result['currency'])}</div>
 <p>Spot {money(result['spot'])} · Rate {result['rate']:.2%} · Continuous dividend yield {result['dividend_yield']:.2%}</p>
 <h2>Fixed contracts</h2><div class="scroll"><table><thead><tr><th>Position</th><th>Strike</th><th>Expiry</th><th>Quantity</th><th>Multiplier</th>{input_columns}<th>Model value</th></tr></thead><tbody>{rows}</tbody></table></div>
 <h2>Portfolio sensitivities</h2><p>Signed quantities and contract multipliers are included. These are local changes, not maximum losses.</p><div class="scroll"><table><tbody>{greek_rows}</tbody></table></div><h2>Scenario P&amp;L</h2><p>Change in model value, excluding fees and financing. Volatility changes are absolute percentage points.</p><div class="scroll"><table><thead><tr><th>Scenario</th><th>Date</th><th>Spot change</th><th>Vol points</th><th>P&amp;L</th></tr></thead><tbody>{scenario_rows}</tbody></table></div>

@@ -23,6 +23,12 @@ class RegressionTest(unittest.TestCase):
         self.assertNotIn('<script>', result)
         self.assertIn('&lt;script&gt;', result)
 
+    def test_optional_quote_provenance_is_escaped_in_report(self):
+        q = sample()
+        result = render(analyse(q), q, 'Quote source <img onerror=alert(1)>')
+        self.assertIn('Quote source &lt;img', result)
+        self.assertNotIn('<img', result)
+
     def test_report_contains_replay_inputs_and_sensitivity_units(self):
         q = sample()
         q['positions'][0]['id'] = '<img onerror=alert(1)>'

@@ -15,11 +15,11 @@ OUT.mkdir(exist_ok=True)
 (OUT/'runtime').mkdir(exist_ok=True)
 for name in FILES:
     shutil.copyfile(RUNTIME/name,OUT/'runtime'/name)
-for name in ['index.html','styles.css','app.js','worker.mjs']:
+for name in ['index.html','styles.css','app.js','worker.mjs','quotes.html','quotes-app.js']:
     shutil.copyfile(ROOT/'web'/name,OUT/name)
 engine=io.BytesIO()
 with zipfile.ZipFile(engine,'w',zipfile.ZIP_DEFLATED) as archive:
-    for name in ['__init__.py','pricing.py','scenarios.py','report.py']:
+    for name in ['__init__.py','pricing.py','scenarios.py','report.py','quotes.py']:
         source=ROOT/'options_risk'/name
         if source.is_symlink(): raise ValueError('No symlink sources')
         info=zipfile.ZipInfo('options_risk/'+name,(1980,1,1,0,0,0));info.compress_type=zipfile.ZIP_DEFLATED
