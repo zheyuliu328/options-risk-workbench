@@ -1,0 +1,15 @@
+{
+  "as_of": "2026-01-01",
+  "underlying": "INVENTED_ETF",
+  "currency": "USD",
+  "spot": 100,
+  "rate": 0.03,
+  "dividend_yield": 0.01,
+  "quotes": [
+    {"id": "european-call", "kind": "call", "style": "european", "strike": 100, "expiry": "2027-01-01", "bid": 10.7, "ask": 10.9},
+    {"id": "american-put", "kind": "put", "style": "american", "strike": 100, "expiry": "2027-01-01", "bid": 9.0, "ask": 9.2},
+    {"id": "exercise-boundary", "kind": "put", "style": "american", "strike": 200, "expiry": "2027-01-01", "bid": 100, "ask": 100.1},
+    {"id": "crossed-quote", "kind": "call", "style": "european", "strike": 100, "expiry": "2027-01-01", "bid": 11, "ask": 10},
+    {"id": "expired-mismatch", "kind": "call", "style": "european", "strike": 100, "expiry": "2026-01-01", "bid": 1, "ask": 2}
+  ]
+}

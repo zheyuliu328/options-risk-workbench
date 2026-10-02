@@ -52,7 +52,7 @@ Documented permitted data adapters; discrete dividends and richer convergence di
 
 ## Development and validation
 
-Independent implementation with AI-assisted development and human-reviewable tests. Current checks: 32 tests (including overnight numerical-boundary regressions); GitHub CI checks Python 3.10/3.12, covering closed-form reference values, parity, American exercise/convergence, fixed-contract scenarios, portfolio offsets, invalid inputs, output protection and report escaping. A readable synthetic report was visually checked at desktop size and for mobile page overflow. These checks do not reproduce the historical academic research.
+Independent implementation with AI-assisted development and human-reviewable tests. GitHub CI checks Python 3.10/3.12, covering closed-form reference values, parity, American exercise/convergence, fixed-contract scenarios, portfolio offsets, invalid inputs, output protection and report escaping. A separate optional QuantLib job runs independent-engine and quote-inversion references. A readable synthetic report was visually checked at desktop size and for mobile page overflow. These checks do not reproduce the historical academic research.
 
 Browser delivery (2026-09-29): editable positions/scenarios, JSON import, JSON/HTML export, stale-result invalidation and cancellation. The same Python source runs locally and in the self-hosted Pyodide worker; all output fields matched native Python within 1e-8 relative numeric tolerance. See [browser verification](docs/browser-validation.json). No input upload endpoint.
 
@@ -71,3 +71,7 @@ MIT licensed. Third-party browser runtime notices remain in the public build.
 ## Independent revaluation investigation
 
 The optional offline validator compares fixed contracts against QuantLib analytic/finite-difference engines, reports reference-grid stability and odd/even CRR step sensitivity, and independently rebuilds full scenario revaluation. [Run the task and inspect invented evidence](docs/INDEPENDENT_VALIDATION.md). It is separate from the published browser runtime; source-backed quote inputs and their derived outputs remain local.
+
+## Start from option quotes
+
+The native [quote review workflow](docs/QUOTE_REVIEW.md) accepts invented or locally supplied bid/ask premiums and calculates model-consistent European or American implied volatility. It preserves invalid rows, flags unresolved boundaries and low sensitivity, and reports American tree-step differences. [Read the invented example report](docs/quote-review-example/report.html). Browser input and explicit portfolio transfer are still pending; the public browser continues to require supplied volatility.

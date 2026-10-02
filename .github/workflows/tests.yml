@@ -17,6 +17,7 @@ jobs:
         run: |
           cd /tmp
           options-risk "$GITHUB_WORKSPACE/examples/portfolio.json" --output installed-check.json
+          python -m options_risk.quotes "$GITHUB_WORKSPACE/examples/quotes.json" --output installed-quote-review
 
   browser-build:
     runs-on: ubuntu-latest

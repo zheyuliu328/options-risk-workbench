@@ -1,0 +1,449 @@
+{
+  "request": {
+    "as_of": "2026-01-01",
+    "underlying": "INVENTED_ETF",
+    "currency": "USD",
+    "spot": 100,
+    "rate": 0.03,
+    "dividend_yield": 0.01,
+    "quotes": [
+      {
+        "id": "european-call",
+        "kind": "call",
+        "style": "european",
+        "strike": 100,
+        "expiry": "2027-01-01",
+        "bid": 10.7,
+        "ask": 10.9
+      },
+      {
+        "id": "american-put",
+        "kind": "put",
+        "style": "american",
+        "strike": 100,
+        "expiry": "2027-01-01",
+        "bid": 9.0,
+        "ask": 9.2
+      },
+      {
+        "id": "exercise-boundary",
+        "kind": "put",
+        "style": "american",
+        "strike": 200,
+        "expiry": "2027-01-01",
+        "bid": 100,
+        "ask": 100.1
+      },
+      {
+        "id": "crossed-quote",
+        "kind": "call",
+        "style": "european",
+        "strike": 100,
+        "expiry": "2027-01-01",
+        "bid": 11,
+        "ask": 10
+      },
+      {
+        "id": "expired-mismatch",
+        "kind": "call",
+        "style": "european",
+        "strike": 100,
+        "expiry": "2026-01-01",
+        "bid": 1,
+        "ask": 2
+      }
+    ]
+  },
+  "rows": [
+    {
+      "row": 1,
+      "input": {
+        "id": "european-call",
+        "kind": "call",
+        "style": "european",
+        "strike": 100,
+        "expiry": "2027-01-01",
+        "bid": 10.7,
+        "ask": 10.9
+      },
+      "estimates": {
+        "bid": {
+          "premium": 10.7,
+          "model": "BSM",
+          "steps": null,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": 0.24838678276864812,
+          "repriced": 10.700000000973667,
+          "residual": 9.736673689531017e-10,
+          "iterations": 34,
+          "volatility_floor": 0.0,
+          "status": "solved",
+          "volatility_bracket": [
+            0.2483867824776098,
+            0.24838678276864812
+          ],
+          "vega_per_vol_point": 0.38678270286784766
+        },
+        "mid": {
+          "premium": 10.8,
+          "model": "BSM",
+          "steps": null,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": 0.25097233563428745,
+          "repriced": 10.79999999765056,
+          "residual": -2.3494415302138805e-09,
+          "iterations": 34,
+          "volatility_floor": 0.0,
+          "status": "solved",
+          "volatility_bracket": [
+            0.25097233563428745,
+            0.25097233592532575
+          ],
+          "vega_per_vol_point": 0.38674598306980096
+        },
+        "ask": {
+          "premium": 10.9,
+          "model": "BSM",
+          "steps": null,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": 0.2535581387928687,
+          "repriced": 10.899999994343155,
+          "residual": -5.656845658563725e-09,
+          "iterations": 34,
+          "volatility_floor": 0.0,
+          "status": "solved",
+          "volatility_bracket": [
+            0.2535581387928687,
+            0.253558139083907
+          ],
+          "vega_per_vol_point": 0.38670783463250297
+        }
+      },
+      "status": "solved"
+    },
+    {
+      "row": 2,
+      "input": {
+        "id": "american-put",
+        "kind": "put",
+        "style": "american",
+        "strike": 100,
+        "expiry": "2027-01-01",
+        "bid": 9.0,
+        "ask": 9.2
+      },
+      "estimates": {
+        "bid": {
+          "premium": 9.0,
+          "model": "CRR",
+          "steps": 300,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": 0.25008476169637395,
+          "repriced": 8.999999990289519,
+          "residual": -9.71048130793406e-09,
+          "iterations": 33,
+          "volatility_floor": 0.0011547005384947215,
+          "status": "solved",
+          "volatility_bracket": [
+            0.25008476169637395,
+            0.2500847622783161
+          ],
+          "vega_per_vol_point": 0.3871762600132094
+        },
+        "mid": {
+          "premium": 9.1,
+          "model": "CRR",
+          "steps": 300,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": 0.2526676729457771,
+          "repriced": 9.099999995249691,
+          "residual": -4.750308590928398e-09,
+          "iterations": 35,
+          "volatility_floor": 0.0011547005384947215,
+          "status": "solved",
+          "volatility_bracket": [
+            0.2526676729457771,
+            0.2526676730912626
+          ],
+          "vega_per_vol_point": 0.3871421443951455
+        },
+        "ask": {
+          "premium": 9.2,
+          "model": "CRR",
+          "steps": 300,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": 0.255250764015315,
+          "repriced": 9.199999996656537,
+          "residual": -3.3434623958328302e-09,
+          "iterations": 34,
+          "volatility_floor": 0.0011547005384947215,
+          "status": "solved",
+          "volatility_bracket": [
+            0.255250764015315,
+            0.25525076430628607
+          ],
+          "vega_per_vol_point": 0.3871164800638631
+        }
+      },
+      "mid_step_diagnostics": [
+        {
+          "premium": 9.1,
+          "model": "CRR",
+          "steps": 301,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": 0.2523212727113969,
+          "repriced": 9.10000000507047,
+          "residual": 5.070470265877702e-09,
+          "iterations": 35,
+          "volatility_floor": 0.0011527808355237478,
+          "status": "solved",
+          "volatility_bracket": [
+            0.2523212725659113,
+            0.2523212727113969
+          ],
+          "vega_per_vol_point": 0.38775828916395133
+        },
+        {
+          "premium": 9.1,
+          "model": "CRR",
+          "steps": 600,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": 0.25260232963914353,
+          "repriced": 9.100000002257085,
+          "residual": 2.2570851854197826e-09,
+          "iterations": 34,
+          "volatility_floor": 0.0008164965810093756,
+          "status": "solved",
+          "volatility_bracket": [
+            0.25260232934815274,
+            0.25260232963914353
+          ],
+          "vega_per_vol_point": 0.3872895426784133
+        },
+        {
+          "premium": 9.1,
+          "model": "CRR",
+          "steps": 601,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": 0.2524289035563016,
+          "repriced": 9.100000006196439,
+          "residual": 6.196438917527303e-09,
+          "iterations": 33,
+          "volatility_floor": 0.0008158170165295857,
+          "status": "solved",
+          "volatility_bracket": [
+            0.25242890297431997,
+            0.2524289035563016
+          ],
+          "vega_per_vol_point": 0.38759627468958163
+        }
+      ],
+      "status": "solved"
+    },
+    {
+      "row": 3,
+      "input": {
+        "id": "exercise-boundary",
+        "kind": "put",
+        "style": "american",
+        "strike": 200,
+        "expiry": "2027-01-01",
+        "bid": 100,
+        "ask": 100.1
+      },
+      "estimates": {
+        "bid": {
+          "premium": 100.0,
+          "model": "CRR",
+          "steps": 300,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": null,
+          "repriced": null,
+          "residual": null,
+          "iterations": 0,
+          "status": "boundary_at_price_tolerance",
+          "lower_price": 100.0
+        },
+        "mid": {
+          "premium": 100.05,
+          "model": "CRR",
+          "steps": 300,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": 0.43682654142666855,
+          "repriced": 100.05000000145996,
+          "residual": 1.459966370020993e-09,
+          "iterations": 33,
+          "volatility_floor": 0.0011547005384947215,
+          "status": "solved",
+          "volatility_bracket": [
+            0.4368265408447264,
+            0.43682654142666855
+          ],
+          "vega_per_vol_point": 0.04948264200166909
+        },
+        "ask": {
+          "premium": 100.1,
+          "model": "CRR",
+          "steps": 300,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": 0.4459137618393163,
+          "repriced": 100.10000000073592,
+          "residual": 7.35923322281451e-10,
+          "iterations": 33,
+          "volatility_floor": 0.0011547005384947215,
+          "status": "solved",
+          "volatility_bracket": [
+            0.44591376125737414,
+            0.4459137618393163
+          ],
+          "vega_per_vol_point": 0.05854751714622997
+        }
+      },
+      "mid_step_diagnostics": [
+        {
+          "premium": 100.05,
+          "model": "CRR",
+          "steps": 301,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": 0.43680535797744613,
+          "repriced": 100.04999999780753,
+          "residual": -2.1924648763160803e-09,
+          "iterations": 33,
+          "volatility_floor": 0.0011527808355237478,
+          "status": "solved",
+          "volatility_bracket": [
+            0.43680535797744613,
+            0.4368053585593885
+          ],
+          "vega_per_vol_point": 0.04684267161608152
+        },
+        {
+          "premium": 100.05,
+          "model": "CRR",
+          "steps": 600,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": 0.436479725099582,
+          "repriced": 100.0500000015853,
+          "residual": 1.5853061086090747e-09,
+          "iterations": 33,
+          "volatility_floor": 0.0008164965810093756,
+          "status": "solved",
+          "volatility_bracket": [
+            0.4364797245176004,
+            0.436479725099582
+          ],
+          "vega_per_vol_point": 0.04129415381868739
+        },
+        {
+          "premium": 100.05,
+          "model": "CRR",
+          "steps": 601,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": 0.43666761210066346,
+          "repriced": 100.04999999957747,
+          "residual": -4.225313432471012e-10,
+          "iterations": 33,
+          "volatility_floor": 0.0008158170165295857,
+          "status": "solved",
+          "volatility_bracket": [
+            0.43666761210066346,
+            0.4366676126826451
+          ],
+          "vega_per_vol_point": 0.04282826800761558
+        }
+      ],
+      "status": "needs_review"
+    },
+    {
+      "row": 4,
+      "input": {
+        "id": "crossed-quote",
+        "kind": "call",
+        "style": "european",
+        "strike": 100,
+        "expiry": "2027-01-01",
+        "bid": 11,
+        "ask": 10
+      },
+      "status": "invalid_input",
+      "error": "quote requires nonnegative bid <= ask"
+    },
+    {
+      "row": 5,
+      "input": {
+        "id": "expired-mismatch",
+        "kind": "call",
+        "style": "european",
+        "strike": 100,
+        "expiry": "2026-01-01",
+        "bid": 1,
+        "ask": 2
+      },
+      "estimates": {
+        "bid": {
+          "premium": 1.0,
+          "model": "BSM",
+          "steps": null,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": null,
+          "repriced": null,
+          "residual": null,
+          "iterations": 0,
+          "status": "inconsistent_expiry_price"
+        },
+        "mid": {
+          "premium": 1.5,
+          "model": "BSM",
+          "steps": null,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": null,
+          "repriced": null,
+          "residual": null,
+          "iterations": 0,
+          "status": "inconsistent_expiry_price"
+        },
+        "ask": {
+          "premium": 2.0,
+          "model": "BSM",
+          "steps": null,
+          "price_tolerance": 1e-08,
+          "volatility_cap": 5.0,
+          "volatility": null,
+          "repriced": null,
+          "residual": null,
+          "iterations": 0,
+          "status": "inconsistent_expiry_price"
+        }
+      },
+      "status": "needs_review"
+    }
+  ],
+  "attention_count": 3,
+  "limits": [
+    "Quotes are caller-supplied; timestamps, source authenticity and executable liquidity are not verified.",
+    "IV is conditional on spot, rates, continuous dividend yield, exercise style and ACT/365 maturity.",
+    "Bid/ask IV is a quote-implied range, not a statistical confidence interval.",
+    "American IV inverts a fixed CRR tree; odd/even and refined step results show discretisation sensitivity, not error bounds.",
+    "No discrete dividends, volatility-surface fit, no-arbitrage surface certification or investment advice.",
+    "Low-sensitivity or boundary prices do not identify a reliable positive volatility.",
+    "No portfolio volatility is changed automatically."
+  ],
+  "input_sha256": "128c5e2e5600f142aa9870c4444dbe87ad12244fc766ece55f22e7d81570d11e"
+}
