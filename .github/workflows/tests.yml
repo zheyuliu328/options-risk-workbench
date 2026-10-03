@@ -19,6 +19,9 @@ jobs:
           options-risk "$GITHUB_WORKSPACE/examples/portfolio.json" --output installed-check.json
           python -m options_risk.quotes "$GITHUB_WORKSPACE/examples/quotes.json" --output installed-quote-review
           python -m options_risk.quotes installed-quote-review/result.json --output installed-quote-replayed
+          python -m options_risk.grid "$GITHUB_WORKSPACE/examples/price-grid.json" --output installed-price-grid
+          python -m options_risk.grid installed-price-grid/request.json --output installed-price-grid-replayed
+          cmp installed-price-grid/results.json installed-price-grid-replayed/results.json
           python -m options_risk.diagnostics "$GITHUB_WORKSPACE/examples/greek-boundary.json" --output installed-numerical-diagnostics
 
   browser-build:

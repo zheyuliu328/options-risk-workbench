@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "portfolio": {
+    "as_of": "2026-09-29",
+    "underlying": "SYNTHETIC_ETF",
+    "currency": "USD",
+    "spot": 100,
+    "rate": 0.03,
+    "dividend_yield": 0.01,
+    "positions": [
+      {
+        "id": "long-call",
+        "expiry": "2026-10-29",
+        "strike": 100,
+        "quantity": 1,
+        "multiplier": 100,
+        "volatility": 0.25,
+        "kind": "call",
+        "style": "european"
+      },
+      {
+        "id": "long-put",
+        "expiry": "2026-10-29",
+        "strike": 100,
+        "quantity": 1,
+        "multiplier": 100,
+        "volatility": 0.25,
+        "kind": "put",
+        "style": "european"
+      }
+    ]
+  },
+  "grid": {
+    "lower_return": -0.2,
+    "upper_return": 0.2,
+    "points": 21,
+    "days": 0,
+    "vol_change": 0
+  },
+  "source_note": "Original invented long straddle; no observed trades or market data."
+}
