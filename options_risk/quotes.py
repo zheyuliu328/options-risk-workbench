@@ -187,6 +187,7 @@ def render_quote_review(result):
 
 
 def main():
+    from .file_inputs import DOWNLOAD_LIMIT, quote_input, load_download
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('input',type=Path)
     parser.add_argument('--output',type=Path,required=True)
@@ -195,7 +196,11 @@ def main():
         parser.error('output exists; choose a new directory')
     try:
         raw = args.input.read_bytes()
-        result = review_quotes(json.loads(raw))
+        request, input_format = quote_input(load_download(raw))
+        result = review_quotes(request)
+        result['input_format'] = input_format
+        if input_format == 'quote_report':
+            result['limits'].append(DOWNLOAD_LIMIT)
         result['input_sha256'] = hashlib.sha256(raw).hexdigest()
         encoded = json.dumps(result,indent=2,allow_nan=False)+'\n'
         report = render_quote_review(result)

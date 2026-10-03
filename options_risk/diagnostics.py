@@ -160,7 +160,7 @@ def render(result):
 
 
 def main():
-    from .file_inputs import DOWNLOAD_LIMIT, portfolio_input
+    from .file_inputs import DOWNLOAD_LIMIT, portfolio_input, load_download
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('input', type=Path)
     parser.add_argument('--position')
@@ -170,11 +170,11 @@ def main():
         parser.error('output exists; choose a new directory')
     try:
         raw = args.input.read_bytes()
-        request, input_format = portfolio_input(json.loads(raw))
+        request, input_format = portfolio_input(load_download(raw))
         result = diagnose(request, args.position)
         result['input_sha256'] = hashlib.sha256(raw).hexdigest()
         result['input_format'] = input_format
-        if input_format == 'browser_portfolio_export':
+        if input_format != 'portfolio_request':
             result['limits'].append(DOWNLOAD_LIMIT)
         report = render(result)
         args.output.mkdir(parents=True, exist_ok=False)

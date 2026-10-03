@@ -10,6 +10,15 @@ python -m options_risk.quotes examples/quotes.json --output /tmp/my-new-quote-re
 
 Choose a new directory. Open `report.html` offline and retain `result.json` for reproduction. No optional library is required for the calculation. The example is invented, including the crossed spread, exercise-boundary and expiry-price counterexamples. Incorrect rows remain visible rather than disappearing from the report. A nonstandard JSON file containing NaN or Infinity is rejected as a whole before creating output.
 
+Downloaded quote JSON from the website, or this command's own `result.json`, can be supplied directly to the same command. Only the saved `request` is recomputed; saved rows, warnings and results are not treated as verified evidence. A new raw-file SHA-256 and input-format label identify the current input, and the original artifact remains unchanged.
+
+```sh
+python -m options_risk.quotes downloaded-quote-review.json --output /tmp/replayed-quote-review
+options-risk quote-derived-portfolio.json --output /tmp/replayed-portfolio.json --html /tmp/replayed-portfolio.html
+```
+
+The second command accepts the website's selected quote portfolio (`request` plus `source_note`) as well as the portfolio results download (`request` plus `result`, optionally `source_note`). Numerical diagnostics and the optional independent validator accept both portfolio formats too. Preserve the original downloaded portfolio input for later reproduction: the standard portfolio CLI retains its existing result-only JSON format. Its HTML report records the input format, raw-file hash and unverified-download limitation. No stored calculation or source note is authenticated. Unknown or mixed envelopes, duplicate JSON fields and non-finite numbers are rejected, including within ignored stored results. These are installed-tool handoffs, not new browser controls.
+
 Required top-level fields: `as_of` (ISO date), `underlying`, `currency`, `spot`, and `quotes` (1–20 rows). Optional `rate` and `dividend_yield` are annual continuous ratios, defaulting to zero. Each quote requires a unique `id`, `kind` (`call`/`put`), `style` (`european`/`american`), positive `strike`, ISO `expiry`, `bid` and `ask`. Premiums are per underlying unit, without a quantity or multiplier. All occurrences of duplicate IDs are rejected. Unknown fields are rejected to prevent silent interpretation loss.
 
 ## Interpret the result

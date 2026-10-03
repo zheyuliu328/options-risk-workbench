@@ -352,7 +352,7 @@ This report is not market-price certification, trading performance or VaR.</p>
 
 
 def main():
-    from .file_inputs import DOWNLOAD_LIMIT, portfolio_input
+    from .file_inputs import DOWNLOAD_LIMIT, portfolio_input, load_download
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('input', type=Path)
     parser.add_argument('--output', required=True, type=Path)
@@ -362,10 +362,10 @@ def main():
         parser.error('output exists; choose a new directory')
     try:
         raw = args.input.read_bytes()
-        request, input_format = portfolio_input(json.loads(raw))
+        request, input_format = portfolio_input(load_download(raw))
         investigation = investigate(request)
         investigation['input_format'] = input_format
-        if input_format == 'browser_portfolio_export':
+        if input_format != 'portfolio_request':
             investigation['limits'].append(DOWNLOAD_LIMIT)
         if args.context:
             context_bytes = args.context.read_bytes()
