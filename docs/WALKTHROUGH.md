@@ -49,3 +49,13 @@ The limits are part of the project. The American tree is sensitive to resolution
 ## Personal understanding gate — pending
 
 Without reading this document, explain the two examples in English, give the English introduction, and answer the five follow-ups with units. The user's ability to do this has not been assessed. Do not mark this gate passed merely because the material exists.
+
+## Explain the price-range expiry counterexample
+
+Choose **Explore a price range** and the invented expiry counterexample. Each node reprices the same contracts at a different spot return, with the declared time and volatility change held fixed. The vertical axis is the new modeled value minus the initial modeled value, including signed quantity and multiplier. It is not a realised trading return or a payoff measured from an independently supplied execution premium.
+
+At unchanged spot, moving to expiry can still lose time value: zero spot return is not zero elapsed time. For the long straddle, terminal intrinsic value changes slope at the strike. A delta/gamma approximation based on initial smooth sensitivities cannot reproduce that expiry kink across a large range. The full-revaluation curve is exact only within the selected pricing assumptions, not an assertion that those assumptions describe the market.
+
+The zero-return anchor makes the time effect visible even when evenly spaced nodes would miss it. Sampled minima and maxima describe only the selected nodes; they are not continuous worst-case bounds, loss probabilities or VaR. Prices between nodes, omitted shocks, changing volatility surfaces and unsupported post-expiry cash flows are outside this report's claim.
+
+Import a fresh invented range request, identify initial value and fixed contracts, then download the replay input and report. Explain the zero-return anchor and one large-shock residual using the displayed units. This owner explanation and unassisted human use remain pending.
