@@ -109,7 +109,7 @@ def plot_svg(result):
                     f'{dash} points="'+ ' '.join(xy(r,k) for r in rows)+'"/>'
                     for k,color,dash in [('change','#264c71',''),('approximation','#a35b2d','stroke-dasharray="7 5"')])
     unit = escape(result['valuation']['currency'])
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 330" width="100%" role="img" '
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 330" width="100%" style="min-width:700px" role="img" '
             f'aria-label="Sampled model-value change versus spot price in {unit}">'
             '<title>Full revaluation (solid blue) and local approximation (dashed brown)</title>'
             '<rect width="840" height="330" fill="white"/>'
@@ -135,7 +135,7 @@ def render_grid(result):
              f'<p>Scenario date {esc(result["horizon"])}; elapsed days {esc(grid["days"])}; '
              f'volatility change {esc(grid["vol_change"])} (absolute fraction); '
              f'{len(result["rows"])} sampled prices, including zero spot return.</p>'
-             +plot_svg(result)+table+'<h2>Curve limits</h2><ul>'
+             +'<p>On a narrow screen, scroll the chart and table horizontally.</p><div class="scroll">'+plot_svg(result)+'</div>'+table+'<h2>Curve limits</h2><ul>'
              +''.join('<li>'+esc(x)+'</li>' for x in result['limits'])+'</ul>')
     return render_portfolio(result['valuation'],result['scenario_request'],
                             result['request'].get('source_note')).replace('<main>', '<main>'+block, 1)
