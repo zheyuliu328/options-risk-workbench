@@ -82,4 +82,4 @@ The optional native [single-contract diagnostic](docs/NUMERICAL_SENSITIVITY.md) 
 
 ## Inspect a spot-price range
 
-The native [price-range workflow](docs/PRICE_GRID.md) samples a fixed portfolio across spot prices, retaining full model-value change, local approximation and signed residual at every node. Reports contain the complete contracts, numerical table and a readable curve. The browser implementation has a separate **Explore a price range** task with examples, request import and offline report export; see the release record for publication status.
+The native [price-range workflow](docs/PRICE_GRID.md) samples a fixed portfolio across spot prices, retaining full model-value change, local approximation and signed residual at every node. Reports contain the complete contracts, numerical table and a readable curve. The [public browser](https://options-risk-zheyuliu.mystic-pear-2111.chatgpt.site/#grid-panel) offers **Explore a price range** with examples, request import and offline report export. Open the disclosure if following a direct link.

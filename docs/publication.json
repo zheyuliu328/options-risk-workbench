@@ -4,12 +4,12 @@
   "access": "public",
   "deployment_status": "succeeded",
   "project_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8",
-  "version_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8~appgver_79fc67db92308191b475bb2f5ce13921",
-  "deployment_id": "appgdep_6ac00deaa664819184acc495b1370b68",
-  "sites_source_sha": "27ae824eceeef63fb716319a092dcd63f3492804",
-  "github_runtime_sha": "721087e328295cfac7355d5108b9964a739a49d4",
-  "runtime_ci": 37051974420,
-  "verification": "Sites version 9 deployed successfully. Public boundary-put numerical task completed; six step rows and six bump rows displayed. HTML/JSON downloaded; 126 numerical export fields matched native recomputation within 1e-9 relative/absolute tolerance. Earlier quote-to-portfolio task remains covered by runtime regression. Later native CLI and independent-validator changes are not represented as browser features. Human acceptance remains pending.",
+  "version_id": "appgprj_6abbc922cf208191a36b678d3b4eebc8~appgver_89747d17a38c8191ada036b5143ff86c",
+  "deployment_id": "appgdep_6ac0912d4cbc8191806018627c36338b",
+  "sites_source_sha": "c4d0cee9072cfccafabc024d21f60f30ab1a1023",
+  "github_runtime_sha": "f6d1c2f70db52dd4bc4de7e3719b6c4f557c144e",
+  "runtime_ci": 37099393038,
+  "verification": "Sites version10 deployed successfully. Exact-runtime CI passed numerical/QuantLib/installed replay and both browser workflows. Local price-grid task compared2234 numerical fields with native Python; original browser flow414 comparisons. Public CUA task completed expiry counterexample, duplicate-key error, replacement with an original own-file case,22node range and all3 downloads. Downloaded request exactly equals original including non-round percentages;766 numerical fields agree with native recomputation at1e-8 relative/1e-10 absolute tolerance. Narrow390px page width375px with internal chart/table scrolling. No human-adoption, trading-profit or production-model-approval claim.",
   "external_human_trial": "pending",
   "owner_explanation": "pending"
 }

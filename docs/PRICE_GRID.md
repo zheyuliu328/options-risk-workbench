@@ -1,6 +1,6 @@
 # Portfolio price-range review
 
-Status: native Python and browser implementation. Check the publication record for the deployed version.
+Status: native Python and public browser workflow, deployed in Sites version10. See [publication receipt](publication.json).
 
 ## Browser task
 
