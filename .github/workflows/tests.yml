@@ -40,11 +40,14 @@ jobs:
       - run: python scripts/build_web.py
       - run: npx playwright install --with-deps chromium
       - run: node tests/browser-flow.cjs
+      - run: node tests/browser-grid.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: browser-flow-evidence
-          path: outputs/browser-flow/
+          path: |
+            outputs/browser-flow/
+            outputs/browser-grid/
 
   independent-reference:
     runs-on: ubuntu-latest

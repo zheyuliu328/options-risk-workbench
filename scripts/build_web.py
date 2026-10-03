@@ -19,7 +19,7 @@ for name in ['index.html','styles.css','app.js','worker.mjs','quotes.html','quot
     shutil.copyfile(ROOT/'web'/name,OUT/name)
 engine=io.BytesIO()
 with zipfile.ZipFile(engine,'w',zipfile.ZIP_DEFLATED) as archive:
-    for name in ['__init__.py','pricing.py','scenarios.py','report.py','quotes.py','diagnostics.py']:
+    for name in ['__init__.py','pricing.py','scenarios.py','report.py','quotes.py','diagnostics.py','grid.py']:
         source=ROOT/'options_risk'/name
         if source.is_symlink(): raise ValueError('No symlink sources')
         info=zipfile.ZipInfo('options_risk/'+name,(1980,1,1,0,0,0));info.compress_type=zipfile.ZIP_DEFLATED

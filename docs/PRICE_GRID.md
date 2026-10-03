@@ -1,8 +1,14 @@
 # Portfolio price-range review
 
-Status: native Python workflow. Browser controls and public release are pending.
+Status: native Python and browser implementation. Check the publication record for the deployed version.
 
-## Complete a task
+## Browser task
+
+Open **Explore a price range** from the portfolio page, then choose **Try straddle range** or **Try expiry counterexample**. To analyse your own portfolio, edit the market and positions above and calculate the range. Custom scenario rows are outside this task. Download replay inputs, full results or the standalone HTML report.
+
+**Import range request** accepts the grid `request.json` format and replaces market/positions, resetting custom scenarios to Unchanged. Browser input supports up to10 positions and30 generated nodes; the native engine supports up to30 positions. Results files are not request files. Unedited numeric inputs retain their original precision through percentage display conversion. Editing any relevant field invalidates old curve downloads. Calculations and selected files stay in the browser.
+
+## Complete a native task
 
 ```sh
 python -m options_risk.grid examples/price-grid.json --output /tmp/price-range-review

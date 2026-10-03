@@ -53,3 +53,7 @@ Verified implementation and reproducible test evidence can be described as proje
 | Narrow screen | Task and downloads completed, or a precisely recorded blocker | Table scrolling is acceptable if the participant can reach and understand the values. |
 
 Retain the exported files, date, viewport and participant's explanation with the blank trial record. These expected values come from the recorded invented software task; copying them is not evidence that a person completed or understood it. The optional native QuantLib investigation is a separate task and must not be described as a browser feature.
+
+## Price-range task — human acceptance pending
+
+Run the expiry counterexample in **Explore a price range**. Explain why a zero spot change still loses time value, why the full curve has a kink, and why sampled extrema are not VaR. Import an original invented range request, change a quantity, recover from a post-expiry input, and download replay inputs plus the report. Reopen the report offline and identify the fixed contracts, initial value and assumptions. Record assistance, time and failures using the blank record above; automated completion is not a human pass.
